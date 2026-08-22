@@ -41,7 +41,11 @@ export const LeaveRequestTable = ({ currentEmployeeId }) => {
   // Apply filters
   const filteredLeaves = baseLeaves.filter((l) => {
     const matchesStatus = statusFilter === 'All' || l.status === statusFilter;
-    const matchesType = typeFilter === 'All' || l.leaveType === typeFilter;
+    const matchesType =
+      typeFilter === 'All' ||
+      l.leaveType === typeFilter ||
+      (typeFilter === 'Paid Leave' && (l.leaveType === 'Paid Time Off' || l.leaveType === 'Paid Leave')) ||
+      (typeFilter === 'Paid Time Off' && (l.leaveType === 'Paid Time Off' || l.leaveType === 'Paid Leave'));
     const matchesSearch =
       l.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       l.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -128,7 +132,7 @@ export const LeaveRequestTable = ({ currentEmployeeId }) => {
             className="px-3 py-1.5 border border-slate-200/80 rounded-xl text-xs bg-white/80 text-slate-700 font-bold focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all cursor-pointer"
           >
             <option value="All">All Leave Types</option>
-            <option value="Paid Time Off">Paid Time Off</option>
+            <option value="Paid Leave">Paid Leave (PTO)</option>
             <option value="Sick Leave">Sick Leave</option>
             <option value="Unpaid Leave">Unpaid Leave</option>
           </select>

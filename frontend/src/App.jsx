@@ -3,10 +3,10 @@ import { useAuth } from './context/AuthContext.jsx';
 import { useConfig } from './context/ConfigContext.jsx';
 import { Sidebar } from './components/common/Sidebar.jsx';
 import { Header } from './components/common/Header.jsx';
-import { ConfigBar } from './components/common/ConfigBar.jsx';
 import { ToastContainer } from './components/common/ToastContainer.jsx';
 import { LoginForm } from './components/auth/LoginForm.jsx';
 import { EmployeeList } from './components/employees/EmployeeList.jsx';
+import { EmployeesPage } from './pages/EmployeesPage.jsx';
 import { EmployeeProfile } from './components/employees/EmployeeProfile.jsx';
 import { EmployeeAttendanceView } from './components/attendance/EmployeeAttendanceView.jsx';
 import { AdminAttendanceView } from './components/attendance/AdminAttendanceView.jsx';
@@ -19,7 +19,7 @@ export function App() {
   const { isAuthenticated, role, currentUser } = useAuth();
   const { flags } = useConfig();
 
-  const [activeTab, setActiveTab] = useState('EMPLOYEES');
+  const [activeTab, setActiveTab] = useState('DASHBOARD');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [globalSearch, setGlobalSearch] = useState('');
 
@@ -37,7 +37,7 @@ export function App() {
     setActiveTab(tabId);
     if (employeeId) {
       setSelectedEmployeeId(employeeId);
-    } else if (tabId === 'EMPLOYEES') {
+    } else if (tabId === 'DASHBOARD' || tabId === 'EMPLOYEES') {
       setSelectedEmployeeId(null);
     }
   };
@@ -52,7 +52,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#F4F9F8] flex text-slate-900 selection:bg-teal-500 selection:text-white font-sans antialiased">
-      {/* 1. Left Sidebar Navigation (Matching Image 2 Reference) */}
+      {/* 1. Left Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
         onTabChange={(tab) => handleNavigate(tab)}
@@ -70,15 +70,23 @@ export function App() {
 
         {/* Scrollable Main Content Container */}
         <main className="flex-1 px-8 pb-10 overflow-y-auto animate-fade-in">
-          {/* DASHBOARD / EMPLOYEES TAB */}
-          {activeTab === 'EMPLOYEES' && (
+          {/* DASHBOARD TAB (Overview with Summary Cards & Employee Cards) */}
+          {activeTab === 'DASHBOARD' && (
             <EmployeeList
               onSelectEmployee={handleSelectEmployee}
               globalSearchQuery={globalSearch}
             />
           )}
 
-          {/* PROFILE VIEW (View-Only Mode by Default per Section 6) */}
+          {/* EMPLOYEES TAB (Dedicated Management Page with Table View & Actions) */}
+          {activeTab === 'EMPLOYEES' && (
+            <EmployeesPage
+              onSelectEmployee={handleSelectEmployee}
+              onEditEmployee={handleSelectEmployee}
+            />
+          )}
+
+          {/* PROFILE VIEW (View-Only Mode by Default, 6 Tab Sections) */}
           {activeTab === 'PROFILE' && (
             <EmployeeProfile
               employeeId={selectedEmployeeId || effectiveEmployeeId}
@@ -86,7 +94,7 @@ export function App() {
             />
           )}
 
-          {/* ATTENDANCE TAB (Role-Gated Views per Section 9) */}
+          {/* ATTENDANCE TAB (Role-Gated Views per Section 7/9) */}
           {activeTab === 'ATTENDANCE' && (
             <div>
               {role === 'ADMIN' ? (
@@ -97,18 +105,18 @@ export function App() {
             </div>
           )}
 
-          {/* TIME OFF / LEAVE TAB */}
+          {/* TIME OFF / LEAVE TAB (Leave Management per Section 8) */}
           {activeTab === 'LEAVE' && (
             <LeaveRequestTable currentEmployeeId={effectiveEmployeeId} />
           )}
 
-          {/* SALARY & PAYROLL TAB */}
+          {/* SALARY & PAYROLL TAB (Payroll Management per Section 9) */}
           {activeTab === 'PAYROLL' && <PayrollRunsTable />}
 
-          {/* REPORTS & ANALYTICS TAB (Admin Only) */}
+          {/* REPORTS & ANALYTICS TAB (Admin Reports per Section 10) */}
           {activeTab === 'ANALYTICS' && <AnalyticsDashboard />}
 
-          {/* CONFIG & SPEC CONFLICTS TAB */}
+          {/* SETTINGS TAB */}
           {activeTab === 'SETTINGS' && <SettingsPage />}
         </main>
       </div>

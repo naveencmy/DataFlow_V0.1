@@ -3,12 +3,12 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useConfig } from '../../context/ConfigContext.jsx';
 import {
   LayoutDashboard,
+  Users,
   Clock,
   Calendar,
   FileText,
   BarChart3,
   Settings,
-  Sliders,
   LogOut,
   Sparkles,
 } from 'lucide-react';
@@ -20,9 +20,15 @@ export const Sidebar = ({ activeTab, onTabChange }) => {
 
   const navItems = [
     {
-      id: 'EMPLOYEES',
+      id: 'DASHBOARD',
       label: 'Dashboard',
       icon: LayoutDashboard,
+      roles: ['ADMIN', 'EMPLOYEE'],
+    },
+    {
+      id: 'EMPLOYEES',
+      label: 'Employees',
+      icon: Users,
       roles: ['ADMIN', 'EMPLOYEE'],
     },
     {
@@ -47,7 +53,7 @@ export const Sidebar = ({ activeTab, onTabChange }) => {
       id: 'ANALYTICS',
       label: 'Reports',
       icon: BarChart3,
-      roles: ['ADMIN'], // Reports per Section 14
+      roles: ['ADMIN'], // Reports for Admin
     },
   ];
 
@@ -125,11 +131,11 @@ export const Sidebar = ({ activeTab, onTabChange }) => {
             <span>Spec Flags</span>
           </span>
           <span className="font-mono font-bold text-[10px] text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded">
-            Sec 13
+            Sec 13 Active
           </span>
         </div>
 
-        {/* Logout Quick Button */}
+        {/* Sign Out Quick Button */}
         <button
           onClick={logout}
           className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"

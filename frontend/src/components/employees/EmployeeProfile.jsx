@@ -9,6 +9,8 @@ import { ResumeTab } from './tabs/ResumeTab.jsx';
 import { PrivateInfoTab } from './tabs/PrivateInfoTab.jsx';
 import { SalaryInfoTab } from './tabs/SalaryInfoTab.jsx';
 import { SecurityTab } from './tabs/SecurityTab.jsx';
+import { EmployeeAttendanceTab } from './tabs/EmployeeAttendanceTab.jsx';
+import { EmployeeLeaveTab } from './tabs/EmployeeLeaveTab.jsx';
 import {
   FileText,
   User,
@@ -70,15 +72,17 @@ export const EmployeeProfile = ({ employeeId, onBack }) => {
   const canSeeSalaryTab = isAdmin || flags.SALARY_INFO_VISIBLE_TO_EMPLOYEE;
 
   const tabs = [
-    { id: 'resume', label: 'Resume', icon: FileText },
-    { id: 'private', label: 'Private Info', icon: User },
+    { id: 'resume', label: 'Job & Resume', icon: FileText },
+    { id: 'private', label: 'Personal Info', icon: User },
     {
       id: 'salary',
       label: 'Salary Info',
       icon: DollarSign,
       hidden: !canSeeSalaryTab && !isAdmin,
     },
-    { id: 'security', label: 'Security', icon: Shield },
+    { id: 'attendance', label: 'Attendance Summary', icon: CheckCircle2 },
+    { id: 'leave', label: 'Leave History', icon: Briefcase },
+    { id: 'security', label: 'Security & Access', icon: Shield },
   ];
 
   return (
@@ -241,6 +245,14 @@ export const EmployeeProfile = ({ employeeId, onBack }) => {
             isEditing={isEditing}
             onChange={handleFieldChange}
           />
+        )}
+
+        {activeTab === 'attendance' && (
+          <EmployeeAttendanceTab employeeId={formData.id} />
+        )}
+
+        {activeTab === 'leave' && (
+          <EmployeeLeaveTab employeeId={formData.id} />
         )}
 
         {activeTab === 'security' && <SecurityTab employee={formData} />}
