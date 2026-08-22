@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Glassmorphism System Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+}
+
+.glass-panel-subtle {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+.glass-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(13, 148, 136, 0.3);
+}
+
+/* Button Refinement */
+.btn-primary {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px -1px rgba(15, 23, 42, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -1px rgba(15, 23, 42, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 14px -2px rgba(13, 148, 136, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-accent:hover {
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -2px rgba(13, 148, 136, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-accent:active {
+  transform: scale(0.98);
+}
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #334155;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #CBD5E1;
+  color: #0F172A;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.btn-glass:active {
+  transform: scale(0.98);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+*:focus-visible {
+  outline: 2px solid #0D9488;
+  outline-offset: 2px;
+}
+
+/* Signature Timeline Rail */
+.timeline-rail {
+  position: relative;
+}
+
+.timeline-rail::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #E2E8F0;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+/* Subtle Shimmer & Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+/* Neo-Pastel KPI Cards (Matching Reference Layout) */
+.kpi-card-mint {
+  background-color: #D9F4ED;
+  color: #0F5E54;
+  border: 1px solid rgba(13, 148, 136, 0.15);
+}
+
+.kpi-card-green {
+  background-color: #DCF5DE;
+  color: #166534;
+  border: 1px solid rgba(22, 101, 52, 0.15);
+}
+
+.kpi-card-blue {
+  background-color: #E2ECFC;
+  color: #1E40AF;
+  border: 1px solid rgba(30, 64, 175, 0.15);
+}
+
+.kpi-card-peach {
+  background-color: #FDE8D7;
+  color: #9A3412;
+  border: 1px solid rgba(154, 52, 18, 0.15);
+}
+
+/* Sidebar Active Navigation Token */
+.sidebar-item-active {
+  background-color: #E6F7F5;
+  color: #0D9488;
+  font-weight: 700;
+}
+
+.sidebar-item-inactive {
+  color: #64748B;
+}
+
+.sidebar-item-inactive:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
+}
+
+/* Aurora Login Page Styling (Matching Image 1 Reference) */
+.aurora-login-bg {
+  background: radial-gradient(circle at 10% 20%, rgba(45, 212, 191, 0.85) 0%, transparent 40%),
+              radial-gradient(circle at 85% 15%, rgba(129, 140, 248, 0.85) 0%, transparent 45%),
+              radial-gradient(circle at 90% 85%, rgba(14, 116, 144, 0.9) 0%, transparent 50%),
+              radial-gradient(circle at 15% 85%, rgba(168, 85, 247, 0.75) 0%, transparent 45%),
+              radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.8) 0%, transparent 60%),
+              linear-gradient(135deg, #0ea5e9 0%, #0d9488 50%, #4338ca 100%);
+}
+
+.glass-login-card {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 25px 60px -12px rgba(12, 74, 110, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.75);
+}
+
+.glass-login-input {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #0F172A;
+}
+
+.glass-login-input::placeholder {
+  color: rgba(51, 65, 85, 0.75);
+}
+
+.glass-login-input:focus {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
