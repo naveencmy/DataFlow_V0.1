@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useHRMS } from '../../context/HRMSContext.jsx';
 import { useNotifications } from '../../context/NotificationContext.jsx';
@@ -6,42 +6,89 @@ import {
   Search,
   Bell,
   ChevronDown,
-  UserCheck,
-  Shield,
+  User,
+  Settings,
+  LogOut,
+  ShieldCheck,
+  Briefcase,
 } from 'lucide-react';
 import { NotificationsDrawer } from './NotificationsDrawer.jsx';
 
-export const Header = ({ onSearch, searchQuery, onSelectEmployee, activeTab }) => {
-  const { currentUser, role, switchPersona } = useAuth();
+export const Header = ({ onSearch, searchQuery, onSelectEmployee, onNavigate, activeTab }) => {
+  const { currentUser, role, logout } = useAuth();
   const { employees } = useHRMS();
   const { notifications, unreadCount } = useNotifications();
-  const [showPersonaMenu, setShowPersonaMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const menuRef = useRef(null);
+  const isAdmin = role === 'ADMIN';
+
+  // Look up the employee record for the logged-in user (for photo + name)
+  const currentEmployee = employees.find(
+    (e) => e.id === currentUser?.employeeId
+  ) || null;
+
+  // Display name: employee record name > user name > fallback
+  const displayName = currentEmployee?.name || (isAdmin ? 'Sarah Williams' : (currentUser?.name || 'Employee'));
+  const displayEmail = currentEmployee?.email || currentUser?.email || 'admin@dayflow.internal';
+  const displayPhoto = currentEmployee?.profilePicture ||
+    (isAdmin
+      ? 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=faces'
+      : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150');
+  const displayRole = isAdmin ? 'Admin / HR Officer' : (currentEmployee?.jobPosition || 'Employee');
+  const ownEmployeeId = currentEmployee?.id || currentUser?.employeeId || (isAdmin ? 'emp-4' : 'emp-1');
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const getPageHeading = () => {
-    if (activeTab === 'DASHBOARD') return currentUser?.name || 'Sarah Williams';
+    if (activeTab === 'DASHBOARD') return isAdmin ? 'Dashboard' : `Welcome, ${displayName.split(' ')[0]}`;
     if (activeTab === 'EMPLOYEES') return 'Employees';
     if (activeTab === 'ATTENDANCE') return 'Attendance Management';
     if (activeTab === 'LEAVE') return 'Time Off & Leave';
     if (activeTab === 'PAYROLL') return 'Payroll & Compensation';
     if (activeTab === 'ANALYTICS') return 'Reports & Analytics';
     if (activeTab === 'SETTINGS') return 'System Settings';
-    if (activeTab === 'PROFILE') return 'Employee Profile';
-    return currentUser?.name || 'Sarah Williams';
+    if (activeTab === 'PROFILE') return isAdmin ? 'Employee Profile' : 'My Profile';
+    return displayName;
+  };
+
+  const handleOpenProfile = () => {
+    setShowUserMenu(false);
+    if (onSelectEmployee) {
+      onSelectEmployee(ownEmployeeId);
+    } else if (onNavigate) {
+      onNavigate('PROFILE', ownEmployeeId);
+    }
+  };
+
+  const handleOpenSettings = () => {
+    setShowUserMenu(false);
+    if (onNavigate) {
+      onNavigate('SETTINGS');
+    }
   };
 
   return (
     <header className="h-20 bg-transparent px-8 flex items-center justify-between gap-6 z-20">
-      {/* Page Title / User Name (Matching Image 2) */}
+      {/* Page Title / User Name */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-sans">
           {getPageHeading()}
         </h1>
       </div>
 
-      {/* Right Controls: Search, Notifications, Persona Switcher */}
+      {/* Right Controls: Search, Notifications, User Menu */}
       <div className="flex items-center gap-4">
-        {/* Search Bar matching Image 2 */}
+        {/* Search Bar */}
         <div className="relative w-72">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -65,98 +112,79 @@ export const Header = ({ onSearch, searchQuery, onSelectEmployee, activeTab }) =
           )}
         </button>
 
-        {/* Persona Switcher & User Avatar */}
-        <div className="relative">
+        {/* User Profile Avatar & Menu Button */}
+        <div className="relative" ref={menuRef}>
           <button
-            onClick={() => setShowPersonaMenu(!showPersonaMenu)}
-            className="flex items-center gap-2.5 p-1.5 pl-2.5 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl shadow-2xs transition-all cursor-pointer"
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className={`flex items-center gap-2.5 p-1.5 pl-3 bg-white hover:bg-slate-50 border rounded-2xl shadow-2xs transition-all cursor-pointer ${
+              showUserMenu ? 'border-teal-500 ring-2 ring-teal-500/10' : 'border-slate-200/80'
+            }`}
           >
             <div className="text-right hidden sm:block">
               <div className="text-xs font-bold text-slate-900 leading-tight">
-                {currentUser?.name}
+                {displayName}
               </div>
-              <div className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                {role === 'ADMIN' ? 'Admin / HR' : 'Employee'}
+              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                {displayRole}
               </div>
             </div>
             <img
-              src={
-                currentUser?.profilePicture ||
-                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
-              }
-              alt={currentUser?.name || 'User'}
+              src={displayPhoto}
+              alt={displayName}
               className="w-9 h-9 rounded-xl object-cover ring-2 ring-slate-100 shadow-2xs shrink-0"
             />
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
           </button>
 
-          {/* Persona Switcher Dropdown */}
-          {showPersonaMenu && (
-            <div className="absolute right-0 mt-2 w-72 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-xl p-2 z-50 animate-fade-in">
-              <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Quick Switch Persona
-                </span>
-                <span className="text-xs font-medium text-slate-600">
-                  Switch persona to test role-gated views
-                </span>
+          {/* Clean User Account Dropdown Menu */}
+          {showUserMenu && (
+            <div className="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-xl p-2 z-50 animate-fade-in divide-y divide-slate-100">
+              {/* Header: User Info Card */}
+              <div className="px-3.5 py-3 flex items-center gap-3">
+                <img
+                  src={displayPhoto}
+                  alt={displayName}
+                  className="w-10 h-10 rounded-xl object-cover ring-2 ring-teal-100 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
+                  <p className="text-[11px] text-slate-400 truncate">{displayEmail}</p>
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-teal-50 text-[10px] font-bold text-teal-700 border border-teal-200/60">
+                    {isAdmin ? <ShieldCheck className="w-3 h-3 text-teal-600" /> : <Briefcase className="w-3 h-3 text-teal-600" />}
+                    {isAdmin ? 'Administrator' : 'Employee'}
+                  </span>
+                </div>
               </div>
 
-              {/* Admin Persona: Sarah Williams */}
-              <button
-                onClick={() => {
-                  switchPersona('ADMIN');
-                  setShowPersonaMenu(false);
-                }}
-                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                  role === 'ADMIN'
-                    ? 'bg-teal-50 text-teal-900 font-bold'
-                    : 'hover:bg-slate-50 text-slate-700'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                    SW
-                  </div>
-                  <div className="text-left">
-                    <div className="font-bold">Sarah Williams</div>
-                    <div className="text-[10px] text-slate-400">Admin / HR Officer</div>
-                  </div>
-                </div>
-                {role === 'ADMIN' && <Shield className="w-4 h-4 text-teal-600" />}
-              </button>
+              {/* Action Links */}
+              <div className="py-1.5 space-y-0.5">
+                <button
+                  onClick={handleOpenProfile}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-900 transition-colors cursor-pointer text-left"
+                >
+                  <User className="w-4 h-4 text-slate-400" />
+                  <span>{isAdmin ? 'Admin Profile' : 'My Profile'}</span>
+                </button>
 
-              {/* Employee Personas */}
-              {employees.slice(0, 3).map((emp) => {
-                const isCurrentEmp = currentUser?.employeeId === emp.id;
-                return (
-                  <button
-                    key={emp.id}
-                    onClick={() => {
-                      switchPersona('EMPLOYEE', emp.id);
-                      setShowPersonaMenu(false);
-                    }}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                      isCurrentEmp
-                        ? 'bg-teal-50 text-teal-900 font-bold'
-                        : 'hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <img
-                        src={emp.profilePicture}
-                        alt={emp.name}
-                        className="w-8 h-8 rounded-lg object-cover shrink-0"
-                      />
-                      <div className="text-left">
-                        <div className="font-bold">{emp.name}</div>
-                        <div className="text-[10px] text-slate-400">{emp.jobPosition}</div>
-                      </div>
-                    </div>
-                    {isCurrentEmp && <UserCheck className="w-4 h-4 text-teal-600" />}
-                  </button>
-                );
-              })}
+                <button
+                  onClick={handleOpenSettings}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-900 transition-colors cursor-pointer text-left"
+                >
+                  <Settings className="w-4 h-4 text-slate-400" />
+                  <span>System Settings</span>
+                </button>
+              </div>
+
+              {/* Logout Action */}
+              <div className="pt-1.5">
+                <button
+                  onClick={logout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -170,3 +198,4 @@ export const Header = ({ onSearch, searchQuery, onSelectEmployee, activeTab }) =
     </header>
   );
 };
+

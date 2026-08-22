@@ -17,9 +17,15 @@ import {
 } from 'lucide-react';
 
 export const EmployeeList = ({ onSelectEmployee, globalSearchQuery = '' }) => {
-  const { role } = useAuth();
+  const { role, currentUser } = useAuth();
   const { employees, attendance, leaves } = useHRMS();
   const isAdmin = role === 'ADMIN';
+  const isEmployee = role === 'EMPLOYEE';
+
+  // For employee role: only show their own card in the dashboard
+  const visibleEmployees = isEmployee
+    ? employees.filter((e) => e.id === currentUser?.employeeId)
+    : employees;
 
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('All');
@@ -30,8 +36,12 @@ export const EmployeeList = ({ onSelectEmployee, globalSearchQuery = '' }) => {
   const effectiveSearch = globalSearchQuery || localSearchQuery;
   const todayStr = getTodayDateString();
 
-  // Compute live headcount stats across all employees
-  const statusCounts = employees.reduce(
+  // KPI counts: Admin sees team-wide stats; Employee sees only their own
+  const baseEmployees = isEmployee
+    ? employees.filter((e) => e.id === currentUser?.employeeId)
+    : employees;
+
+  const statusCounts = baseEmployees.reduce(
     (acc, emp) => {
       const derived = deriveEmployeeWorkStatus(emp.id, todayStr, attendance, leaves);
       if (derived.status === 'PRESENT') acc.present += 1;
@@ -42,18 +52,18 @@ export const EmployeeList = ({ onSelectEmployee, globalSearchQuery = '' }) => {
     { present: 0, onLeave: 0, absent: 0 }
   );
 
-  // Filter employees
-  const filteredEmployees = employees.filter((emp) => {
+  // Filter employees — employee role can only see themselves
+  const filteredEmployees = visibleEmployees.filter((emp) => {
     // 1. Search
     const matchesSearch =
       emp.name.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
-      emp.loginId.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
+      emp.loginId?.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
       emp.jobPosition.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
       emp.email.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
       (emp.location && emp.location.toLowerCase().includes(effectiveSearch.toLowerCase()));
 
-    // 2. Department
-    const matchesDept = departmentFilter === 'All' || emp.department === departmentFilter;
+    // 2. Department (only relevant for Admin)
+    const matchesDept = !isAdmin || departmentFilter === 'All' || emp.department === departmentFilter;
 
     // 3. Status
     const derived = deriveEmployeeWorkStatus(emp.id, todayStr, attendance, leaves);
@@ -87,12 +97,12 @@ export const EmployeeList = ({ onSelectEmployee, globalSearchQuery = '' }) => {
               <Users className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-teal-900/80 block mt-3">
-              Total Headcount
+              {isAdmin ? 'Total Headcount' : 'My Status'}
             </span>
           </div>
 
           <div className="text-3xl font-extrabold font-mono text-teal-950 tabular-nums">
-            {employees.length}
+            {isAdmin ? baseEmployees.length : 1}
           </div>
         </div>
 

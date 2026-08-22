@@ -47,8 +47,13 @@ export function App() {
     setActiveTab('PROFILE');
   };
 
-  // Find linked employee ID for logged in user
-  const effectiveEmployeeId = currentUser?.employeeId || selectedEmployeeId || 'emp-1';
+  // For EMPLOYEE role: always locked to their own employeeId
+  // For ADMIN role: can navigate to any selectedEmployeeId
+  const isEmployee = role === 'EMPLOYEE';
+  const ownEmployeeId = currentUser?.employeeId || null;
+  const effectiveEmployeeId = isEmployee
+    ? (ownEmployeeId || 'emp-1')
+    : (selectedEmployeeId || ownEmployeeId || 'emp-1');
 
   return (
     <div className="min-h-screen bg-[#F4F9F8] flex text-slate-900 selection:bg-teal-500 selection:text-white font-sans antialiased">
@@ -66,6 +71,7 @@ export function App() {
           searchQuery={globalSearch}
           onSearch={setGlobalSearch}
           onSelectEmployee={handleSelectEmployee}
+          onNavigate={handleNavigate}
         />
 
         {/* Scrollable Main Content Container */}
@@ -78,19 +84,29 @@ export function App() {
             />
           )}
 
-          {/* EMPLOYEES TAB (Dedicated Management Page with Table View & Actions) */}
+          {/* EMPLOYEES TAB — Admin only. Employees are redirected to their own profile */}
           {activeTab === 'EMPLOYEES' && (
-            <EmployeesPage
-              onSelectEmployee={handleSelectEmployee}
-              onEditEmployee={handleSelectEmployee}
-            />
+            isEmployee ? (
+              // Employee should never reach this tab — redirect to own profile
+              <EmployeeProfile
+                employeeId={effectiveEmployeeId}
+                onBack={() => handleNavigate('DASHBOARD')}
+                isOwnProfile={true}
+              />
+            ) : (
+              <EmployeesPage
+                onSelectEmployee={handleSelectEmployee}
+                onEditEmployee={handleSelectEmployee}
+              />
+            )
           )}
 
-          {/* PROFILE VIEW (View-Only Mode by Default, 6 Tab Sections) */}
+          {/* PROFILE VIEW — Employee always sees their own profile only */}
           {activeTab === 'PROFILE' && (
             <EmployeeProfile
-              employeeId={selectedEmployeeId || effectiveEmployeeId}
-              onBack={() => handleNavigate('EMPLOYEES')}
+              employeeId={isEmployee ? effectiveEmployeeId : (selectedEmployeeId || effectiveEmployeeId)}
+              onBack={() => handleNavigate(isEmployee ? 'DASHBOARD' : 'EMPLOYEES')}
+              isOwnProfile={isEmployee || selectedEmployeeId === ownEmployeeId}
             />
           )}
 
@@ -105,13 +121,20 @@ export function App() {
             </div>
           )}
 
-          {/* TIME OFF / LEAVE TAB (Leave Management per Section 8) */}
+          {/* TIME OFF / LEAVE TAB — Employee sees only their own leaves */}
           {activeTab === 'LEAVE' && (
-            <LeaveRequestTable currentEmployeeId={effectiveEmployeeId} />
+            <LeaveRequestTable
+              currentEmployeeId={effectiveEmployeeId}
+              filterToEmployee={isEmployee}
+            />
           )}
 
-          {/* SALARY & PAYROLL TAB (Payroll Management per Section 9) */}
-          {activeTab === 'PAYROLL' && <PayrollRunsTable />}
+          {/* SALARY & PAYROLL TAB — Employee sees only own payslips */}
+          {activeTab === 'PAYROLL' && (
+            <PayrollRunsTable
+              filterEmployeeId={isEmployee ? effectiveEmployeeId : null}
+            />
+          )}
 
           {/* REPORTS & ANALYTICS TAB (Admin Reports per Section 10) */}
           {activeTab === 'ANALYTICS' && <AnalyticsDashboard />}
