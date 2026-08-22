@@ -9,6 +9,7 @@
  * - Fixed Allowance (Balancing Component)
  * - Deductions: Employee PF, Employer PF, Professional Tax
  * - Live Payroll Calculation: Days worked / unpaid deductions -> Gross Earned & Net Payable
+ * - Work hours & overtime calculation
  */
 
 export function buildDefaultSalaryComponents(monthlyWage) {
@@ -177,6 +178,45 @@ export function calculateDeductions(
 }
 
 /**
+ * Calculates work hours and extra hours from time strings (e.g. "08:55 AM", "06:30 PM")
+ */
+export function calculateWorkHours(checkInTime, checkOutTime) {
+  if (!checkInTime || !checkOutTime) {
+    return { workHours: 0, extraHours: 0 };
+  }
+
+  const parseToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const clean = timeStr.trim().toUpperCase();
+    const match = clean.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/);
+    if (!match) return 0;
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const meridiem = match[3];
+
+    if (meridiem === 'PM' && hours < 12) hours += 12;
+    if (meridiem === 'AM' && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+  };
+
+  const inMins = parseToMinutes(checkInTime);
+  const outMins = parseToMinutes(checkOutTime);
+
+  let diffMins = outMins - inMins;
+  if (diffMins < 0) diffMins += 24 * 60; // handle midnight rollover
+
+  const totalHours = Number((diffMins / 60).toFixed(2));
+  const standardHours = 8.0;
+  const extraHours = Math.max(0, Number((totalHours - standardHours).toFixed(2)));
+
+  return {
+    workHours: totalHours,
+    extraHours,
+  };
+}
+
+/**
  * Live Payroll calculator connecting Attendance / Leave -> Payable Days -> Net Salary
  */
 export function computeLivePayroll(
@@ -228,5 +268,6 @@ export default {
   buildDefaultSalaryComponents,
   recalculateComponents,
   calculateDeductions,
+  calculateWorkHours,
   computeLivePayroll,
 };
