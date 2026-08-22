@@ -129,7 +129,7 @@ graph TD
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/naveencmy/DataFlow_V0.1.git
-   cd DataFlow_V0.1
+   cd DayFlow_V0.1
    ```
 
 2. **Launch PostgreSQL & Redis**:
@@ -232,7 +232,7 @@ Output:
 ## 📂 Repository Directory Structure
 
 ```text
-DataFlow_V0.1/
+DayFlow_V0.1/
 ├── backend/                        # Production Node.js N-Layer REST API
 │   ├── docker-compose.yml          # PostgreSQL 15 & Redis 7 containers
 │   ├── prisma/
