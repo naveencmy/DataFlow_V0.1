@@ -7,10 +7,18 @@ export class PayrollController {
 
   processMonthlyBatch = async (req, res, next) => {
     try {
-      const result = await this.service.processMonthlyPayroll(req.body);
+      const { month, year, monthIndex } = req.body;
+      const results = await this.service.processMonthlyBatch({
+        month,
+        year: parseInt(year, 10),
+        monthIndex: parseInt(monthIndex, 10),
+      });
+
       res.status(200).json({
         success: true,
-        data: result,
+        message: `Processed payroll for ${results.length} active employees`,
+        data: results,
+        payroll: results,
       });
     } catch (error) {
       next(error);
@@ -19,10 +27,11 @@ export class PayrollController {
 
   getMyPayroll = async (req, res, next) => {
     try {
-      const runs = await this.service.getMyPayroll(req.user);
+      const records = await this.service.getMyPayroll(req.user);
       res.status(200).json({
         success: true,
-        data: runs,
+        data: records,
+        payroll: records,
       });
     } catch (error) {
       next(error);
@@ -31,14 +40,31 @@ export class PayrollController {
 
   getAllPayroll = async (req, res, next) => {
     try {
-      const runs = await this.service.getAllPayroll({
-        year: req.query.year ? parseInt(req.query.year, 10) : undefined,
+      const records = await this.service.getAllPayroll({
         month: req.query.month,
+        year: req.query.year ? parseInt(req.query.year, 10) : undefined,
         employeeId: req.query.employeeId,
       });
       res.status(200).json({
         success: true,
-        data: runs,
+        data: records,
+        payroll: records,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updatePayrollStatus = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const updated = await this.service.updatePayrollStatus(id, status);
+      res.status(200).json({
+        success: true,
+        message: `Payroll status updated to ${status}`,
+        data: updated,
+        payroll: updated,
       });
     } catch (error) {
       next(error);
@@ -47,13 +73,13 @@ export class PayrollController {
 
   downloadPayslipPdf = async (req, res, next) => {
     try {
-      const pdfStream = await this.service.generatePayslipPdfStream(req.params.id);
+      const { id } = req.params;
+      const pdfBuffer = await this.service.generatePayslipPdf(id, req.user);
 
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=payslip-${req.params.id}.pdf`);
-
-      pdfStream.pipe(res);
-      pdfStream.end();
+      res.setHeader('Content-Disposition', `attachment; filename=payslip-${id}.pdf`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      res.end(pdfBuffer);
     } catch (error) {
       next(error);
     }

@@ -12,6 +12,7 @@ export class LeaveController {
         success: true,
         message: 'Leave application submitted successfully',
         data: leave,
+        leave,
       });
     } catch (error) {
       next(error);
@@ -24,6 +25,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         data: leaves,
+        leaves,
       });
     } catch (error) {
       next(error);
@@ -39,6 +41,7 @@ export class LeaveController {
       res.status(200).json({
         success: true,
         data: leaves,
+        leaves,
       });
     } catch (error) {
       next(error);
@@ -52,6 +55,7 @@ export class LeaveController {
         success: true,
         message: `Leave request has been ${req.body.status.toLowerCase()}`,
         data: updated,
+        leave: updated,
       });
     } catch (error) {
       next(error);

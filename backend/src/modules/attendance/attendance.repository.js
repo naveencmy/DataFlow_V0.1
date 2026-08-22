@@ -23,15 +23,27 @@ export class AttendanceRepository {
   }
 
   async findByDate(date) {
-    const query = `
-      SELECT a.*, e.name as "employeeName", e.department, e."profilePicture", e."jobPosition"
-      FROM "Attendance" a
-      JOIN "Employee" e ON e.id = a."employeeId"
-      WHERE a."date" = $1
-      ORDER BY e.name ASC
-    `;
-    const res = await pgPool.query(query, [date]);
-    return res.rows;
+    if (date) {
+      const query = `
+        SELECT a.*, e.name as "employeeName", e.department, e."profilePicture", e."jobPosition"
+        FROM "Attendance" a
+        JOIN "Employee" e ON e.id = a."employeeId"
+        WHERE a."date" = $1
+        ORDER BY e.name ASC
+      `;
+      const res = await pgPool.query(query, [date]);
+      return res.rows;
+    } else {
+      const query = `
+        SELECT a.*, e.name as "employeeName", e.department, e."profilePicture", e."jobPosition"
+        FROM "Attendance" a
+        JOIN "Employee" e ON e.id = a."employeeId"
+        ORDER BY a."date" DESC, e.name ASC
+        LIMIT 100
+      `;
+      const res = await pgPool.query(query);
+      return res.rows;
+    }
   }
 
   async createOrUpdate(record) {
