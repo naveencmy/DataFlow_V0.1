@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import logo from '../../assets/logo.png';
+=======
+import logo from '../../assets/logo.jpeg';
+>>>>>>> 1d39e7bdd06476fc575656aa623c3892fe0c5a1b
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useHRMS } from '../../context/HRMSContext.jsx';
 import { useNotifications } from '../../context/NotificationContext.jsx';
