@@ -75,21 +75,21 @@ Dayflow enforces a strict **N-Layer separation of concerns** with zero cross-lay
 
 ```mermaid
 graph TD
-    Client[Client Apps: React 19 Frontend / Mobile / Swagger UI] -->|HTTP REST / WebSocket| Gateway[Express App Server & Reverse Proxy]
+    Client["Client Apps: React 19 Frontend / Mobile / Swagger UI"] -->|HTTP REST / WebSocket| Gateway["Express App Server & Reverse Proxy"]
     
     subgraph "N-Layer Node.js Backend"
-        Gateway --> Router[1. Route Definitions & Parameter Binding]
-        Router --> Middleware[2. Middlewares: JWT Auth | RBAC | Zod Validation | Rate Limiter]
-        Middleware --> Controller[3. Controllers: Req/Res Handling & HTTP Status Code Mapping]
-        Controller --> Service[4. Domain Services: Pure Business Logic & Calculation Engines]
-        Service --> Repository[5. Repositories: Data Access & SQL / Prisma Operations]
+        Gateway --> Router["1. Route Definitions & Parameter Binding"]
+        Router --> Middleware["2. Middlewares: JWT Auth / RBAC / Zod Validation / Rate Limiter"]
+        Middleware --> Controller["3. Controllers: Req/Res Handling & HTTP Status Code Mapping"]
+        Controller --> Service["4. Domain Services: Pure Business Logic & Calculation Engines"]
+        Service --> Repository["5. Repositories: Data Access & SQL / Prisma Operations"]
     end
 
     subgraph "Data & Infrastructure Layer"
-        Repository --> DB[(PostgreSQL 15 Database)]
-        Service --> Cache[(Redis 7 Sliding Window Cache)]
-        Service --> SMTP[Brevo SMTP Transactional Mailer]
-        Service --> Sockets[Socket.io Real-Time Namespace]
+        Repository --> DB[("PostgreSQL 15 Database")]
+        Service --> Cache[("Redis 7 Sliding Window Cache")]
+        Service --> SMTP["Brevo SMTP Transactional Mailer"]
+        Service --> Sockets["Socket.io Real-Time Namespace"]
     end
 ```
 
