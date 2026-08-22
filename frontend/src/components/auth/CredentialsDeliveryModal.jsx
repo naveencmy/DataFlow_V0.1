@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../common/Modal.jsx';
 import { Check, Copy, KeyRound, UserCheck, Shield, Sparkles } from 'lucide-react';
 
-export const CredentialsDeliveryModal = ({ isOpen, onClose, credentials }) => {
+export const CredentialsDeliveryModal = ({ isOpen = true, onClose, credentials }) => {
   const [copiedId, setCopiedId] = useState(false);
   const [copiedPass, setCopiedPass] = useState(false);
 

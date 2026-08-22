@@ -1,10 +1,27 @@
 import React from 'react';
-import { useNotifications } from '../../context/NotificationContext.jsx';
-import { Bell, CheckCheck, Trash2, X, Calendar, Clock, DollarSign, UserCheck, Shield } from 'lucide-react';
+import {
+  useNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
+} from '../../hooks/useNotificationsQuery.js';
+import {
+  Bell,
+  CheckCheck,
+  X,
+  Calendar,
+  Clock,
+  DollarSign,
+  UserCheck,
+  Shield,
+} from 'lucide-react';
 
 export const NotificationsDrawer = ({ isOpen, onClose }) => {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } =
-    useNotifications();
+  const { data } = useNotificationsQuery();
+  const markReadMutation = useMarkNotificationReadMutation();
+  const markAllReadMutation = useMarkAllNotificationsReadMutation();
+
+  const notifications = data?.notifications || [];
+  const unreadCount = data?.unreadCount || 0;
 
   if (!isOpen) return null;
 
@@ -24,10 +41,11 @@ export const NotificationsDrawer = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
       <div
         className="fixed inset-0 bg-slate-950/40 backdrop-blur-md transition-opacity animate-fade-in"
         onClick={onClose}
+        aria-hidden="true"
       />
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
         <div className="w-screen max-w-md bg-white/95 backdrop-blur-2xl shadow-2xl flex flex-col border-l border-slate-200/80 animate-fade-in">
@@ -40,14 +58,16 @@ export const NotificationsDrawer = ({ isOpen, onClose }) => {
               <div>
                 <h3 className="text-sm font-black text-slate-900 tracking-tight">Notifications</h3>
                 <p className="text-xs text-slate-500 font-medium">
-                  {unreadCount > 0 ? `${unreadCount} unread update${unreadCount > 1 ? 's' : ''}` : 'All caught up'}
+                  {unreadCount > 0
+                    ? `${unreadCount} unread update${unreadCount > 1 ? 's' : ''}`
+                    : 'All caught up'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               {unreadCount > 0 && (
                 <button
-                  onClick={markAllAsRead}
+                  onClick={() => markAllReadMutation.mutate()}
                   className="px-2 py-1 text-xs text-teal-700 hover:bg-teal-50 rounded-lg flex items-center gap-1 font-bold transition-colors cursor-pointer"
                   title="Mark all as read"
                 >
@@ -55,18 +75,10 @@ export const NotificationsDrawer = ({ isOpen, onClose }) => {
                   <span className="hidden sm:inline">Read all</span>
                 </button>
               )}
-              {notifications.length > 0 && (
-                <button
-                  onClick={clearNotifications}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                  title="Clear all"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              )}
               <button
                 onClick={onClose}
                 className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors ml-1 cursor-pointer"
+                aria-label="Close drawer"
               >
                 <X className="w-4.5 h-4.5" />
               </button>
@@ -86,33 +98,44 @@ export const NotificationsDrawer = ({ isOpen, onClose }) => {
                 </p>
               </div>
             ) : (
-              notifications.map((n) => (
-                <div
-                  key={n.id}
-                  onClick={() => markAsRead(n.id)}
-                  className={`p-4 transition-all cursor-pointer flex gap-3.5 items-start ${
-                    !n.read ? 'bg-teal-50/40 hover:bg-teal-50/60' : 'hover:bg-slate-50/80'
-                  }`}
-                >
-                  <div className="mt-0.5 p-2 rounded-xl bg-white border border-slate-200/80 shadow-xs shrink-0">
-                    {iconForType(n.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-0.5">
-                      <h4 className={`text-xs ${!n.read ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'} truncate`}>
-                        {n.title}
-                      </h4>
-                      {!n.read && (
-                        <span className="w-2 h-2 rounded-full bg-teal-500 shadow-xs shadow-teal-500/50 shrink-0" />
-                      )}
+              notifications.map((n) => {
+                const isUnread = !n.isRead;
+                return (
+                  <div
+                    key={n.id}
+                    onClick={() => {
+                      if (isUnread) markReadMutation.mutate(n.id);
+                    }}
+                    className={`p-4 transition-all cursor-pointer flex gap-3.5 items-start ${
+                      isUnread ? 'bg-teal-50/40 hover:bg-teal-50/60' : 'hover:bg-slate-50/80'
+                    }`}
+                  >
+                    <div className="mt-0.5 p-2 rounded-xl bg-white border border-slate-200/80 shadow-xs shrink-0">
+                      {iconForType(n.type)}
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed font-normal">{n.message}</p>
-                    <span className="text-[10px] text-slate-400 mt-1.5 block font-mono">
-                      {n.timestamp}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <h4
+                          className={`text-xs ${
+                            isUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'
+                          } truncate`}
+                        >
+                          {n.title}
+                        </h4>
+                        {isUnread && (
+                          <span className="w-2 h-2 rounded-full bg-teal-500 shadow-xs shadow-teal-500/50 shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                        {n.message}
+                      </p>
+                      <span className="text-[10px] text-slate-400 mt-1.5 block font-mono">
+                        {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -120,3 +143,5 @@ export const NotificationsDrawer = ({ isOpen, onClose }) => {
     </div>
   );
 };
+
+export default NotificationsDrawer;

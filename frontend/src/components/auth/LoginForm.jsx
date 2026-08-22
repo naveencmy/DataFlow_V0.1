@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
-import { useAuth } from '../../context/AuthContext.jsx';
-import { useHRMS } from '../../context/HRMSContext.jsx';
-import { useNotifications } from '../../context/NotificationContext.jsx';
+import { useAuthStore } from '../../stores/authStore.js';
+import { useUIStore } from '../../stores/uiStore.js';
+import { LoginSchema, SignUpSchema } from '../../validation/auth.schema.js';
 import { generateSystemLoginId } from '../../utils/idGenerator.js';
-import { CredentialsDeliveryModal } from './CredentialsDeliveryModal.jsx';
 import {
   Lock,
   User,
@@ -13,7 +15,6 @@ import {
   Phone,
   Eye,
   EyeOff,
-  Upload,
   ArrowRight,
   AlertCircle,
   CheckCircle2,
@@ -21,171 +22,138 @@ import {
   Layers,
   ChevronDown,
   ChevronUp,
+  Upload,
+  UserPlus,
+  LogIn,
 } from 'lucide-react';
 
 export const LoginForm = () => {
-  const { login, registerNewUserAccount } = useAuth();
-  const { employees, addEmployee } = useHRMS();
-  const { showToast } = useNotifications();
+  const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const signup = useAuthStore((state) => state.signup);
+  const addToast = useUIStore((state) => state.addToast);
 
-  // Mode: false = Sign In, true = Sign Up (per Wireframe)
   const [isSignUp, setIsSignUp] = useState(false);
-
-  // Sign In Form States
-  const [loginIdOrEmail, setLoginIdOrEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showSignInPassword, setShowSignInPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showDemoPersonas, setShowDemoPersonas] = useState(false);
-
-  // Sign Up Form States (per Wireframe fields)
-  const [companyName, setCompanyName] = useState('Odoo India');
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [signUpPassword, setSignUpPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [companyLogoName, setCompanyLogoName] = useState(null);
-  const [newCredentials, setNewCredentials] = useState(null);
+  const [showDemoPersonas, setShowDemoPersonas] = useState(false);
+  const [serverError, setServerError] = useState('');
+  const [uploadedLogoName, setUploadedLogoName] = useState(null);
+
+  // Sign In Form (React Hook Form + Zod)
+  const {
+    register: registerLogin,
+    handleSubmit: handleLoginSubmit,
+    formState: { errors: loginErrors, isSubmitting: isLoggingIn },
+    setValue: setLoginValue,
+  } = useForm({
+    resolver: zodResolver(LoginSchema),
+    defaultValues: {
+      loginId: '',
+      password: '',
+    },
+  });
+
+  // Sign Up Form (React Hook Form + Zod)
+  const {
+    register: registerSignUp,
+    handleSubmit: handleSignUpSubmit,
+    formState: { errors: signUpErrors, isSubmitting: isSigningUp },
+    watch: watchSignUp,
+    reset: resetSignUp,
+  } = useForm({
+    resolver: zodResolver(SignUpSchema),
+    defaultValues: {
+      companyName: 'Odoo India',
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      role: 'ADMIN',
+      department: 'Management',
+      jobPosition: 'HR Administrator',
+    },
+  });
 
   // Live Login ID preview per Wireframe rule: [OI][First2First][First2Last][Year][Serial]
-  const previewLoginId = fullName.trim()
-    ? generateSystemLoginId(fullName, companyName, new Date().getFullYear(), employees)
-    : 'OIJODO20260001';
+  const watchedName = watchSignUp('name') || '';
+  const watchedCompany = watchSignUp('companyName') || 'Odoo India';
 
-  // Handle Sign In submission
-  const handleSignInSubmit = (e) => {
-    e.preventDefault();
-    setErrorMessage('');
-    setIsSubmitting(true);
+  const previewLoginId = useMemo(() => {
+    if (!watchedName.trim()) return 'OIJODO20260001';
+    return generateSystemLoginId(watchedName, watchedCompany, new Date().getFullYear(), []);
+  }, [watchedName, watchedCompany]);
 
-    const res = login(loginIdOrEmail, password);
-    if (!res.success) {
-      setErrorMessage(res.error || 'Authentication failed. Please check your credentials.');
-      setIsSubmitting(false);
-    }
-  };
-
-  // Quick 1-click test persona login
-  const handleQuickLogin = (idOrEmail, pass = 'password123') => {
-    setLoginIdOrEmail(idOrEmail);
-    setPassword(pass);
-    setErrorMessage('');
-    login(idOrEmail, pass);
-  };
-
-  // Handle Sign Up submission (per Wireframe)
-  const handleSignUpSubmit = (e) => {
-    e.preventDefault();
-    setErrorMessage('');
-
-    if (signUpPassword !== confirmPassword) {
-      setErrorMessage('Passwords do not match. Please verify.');
-      return;
-    }
-
-    if (signUpPassword.length < 6) {
-      setErrorMessage('Password must be at least 6 characters.');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    // 1. Generate system login ID strictly adhering to wireframe format
-    const generatedLoginId = generateSystemLoginId(
-      fullName,
-      companyName,
-      new Date().getFullYear(),
-      employees
-    );
-
-    // 2. Add employee into HRMS
-    const newEmpId = `emp-${Date.now()}`;
-    const newEmployeeRecord = {
-      name: fullName,
-      email: email.trim().toLowerCase(),
-      mobile: phone || '+91 98765 43210',
-      company: companyName || 'Odoo India',
-      department: 'Engineering',
-      jobPosition: 'Associate Member',
-      monthlyWage: 65000,
-      gender: 'Male',
-      dateOfJoining: new Date().toISOString().split('T')[0],
-      location: 'Bangalore Tech Hub',
-    };
-
+  // Handle Login Submit
+  const onLogin = async (data) => {
+    setServerError('');
     try {
-      addEmployee(newEmployeeRecord);
-
-      // Register direct user account
-      registerNewUserAccount({
-        id: `user-${newEmpId}`,
-        loginId: generatedLoginId,
-        email: email.trim().toLowerCase(),
-        role: 'EMPLOYEE',
-        employeeId: newEmpId,
-        isFirstLogin: false,
+      await login(data);
+      addToast({
+        title: 'Welcome Back',
+        message: 'Signed in successfully to Dayflow HRMS.',
+        type: 'success',
       });
-
-      const creds = {
-        loginId: generatedLoginId,
-        initialPassword: signUpPassword,
-        name: fullName,
-        email: email.trim().toLowerCase(),
-      };
-
-      setNewCredentials(creds);
-      showToast('success', 'Registration Successful 🎉', `Your Login ID is ${generatedLoginId}`);
-      setIsSubmitting(false);
+      navigate('/dashboard');
     } catch (err) {
-      setErrorMessage('Sign up failed. Please try again.');
-      setIsSubmitting(false);
+      setServerError(err.message || 'Invalid credentials.');
     }
   };
 
-  const handleLogoUploadSim = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      if (e.target.files && e.target.files[0]) {
-        setCompanyLogoName(e.target.files[0].name);
-        showToast('info', 'Company Logo Selected', e.target.files[0].name);
-      }
-    };
-    input.click();
+  // Handle Sign Up Submit
+  const onSignUp = async (data) => {
+    setServerError('');
+    try {
+      await signup(data);
+      addToast({
+        title: 'Account Created',
+        message: `Registered successfully! Generated Login ID: ${previewLoginId}`,
+        type: 'success',
+      });
+      resetSignUp();
+      navigate('/dashboard');
+    } catch (err) {
+      setServerError(err.message || 'Registration failed.');
+    }
+  };
+
+  // Quick Demo Persona Filler (Dev mode only)
+  const applyPersona = (loginId, password) => {
+    setIsSignUp(false);
+    setLoginValue('loginId', loginId);
+    setLoginValue('password', password);
+    setServerError('');
   };
 
   return (
-    <div className="min-h-screen aurora-login-bg flex items-center justify-center p-5 sm:p-8 lg:p-12 relative overflow-hidden font-sans">
-      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center relative z-10">
-        
-        {/* LEFT COLUMN: Hero Headline & Value Proposition (Landing Page Style) */}
-        <div className="lg:col-span-6 xl:col-span-7 text-left space-y-6 sm:space-y-7">
-          {/* Top Landing Pill Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4.5 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/35 text-white text-xs sm:text-sm font-bold tracking-wide shadow-sm animate-fade-in">
-            <Sparkles className="w-4 h-4 text-cyan-300 animate-pulse" />
+    <div className="min-h-screen aurora-login-bg flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-hidden font-sans select-none">
+      {/* Background Radial Glow Accents */}
+      <div className="absolute top-[-10%] left-[-10%] w-[550px] h-[550px] rounded-full bg-cyan-400/30 blur-[130px] pointer-events-none animate-pulse duration-1000" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[650px] h-[650px] rounded-full bg-indigo-600/35 blur-[150px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/3 w-[450px] h-[450px] rounded-full bg-teal-300/25 blur-[110px] pointer-events-none" />
+
+      {/* Main Container */}
+      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center z-10">
+        {/* LEFT COLUMN: Hero Pitch (Matching Image 2 Reference) */}
+        <div className="lg:col-span-6 xl:col-span-7 space-y-6 text-white text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-xs font-bold tracking-wide shadow-sm uppercase">
+            <Sparkles className="w-4 h-4 text-cyan-300 animate-spin-slow" />
             <span>Next-Gen Enterprise HRMS</span>
           </div>
 
-          {/* Headline (Larger Size) */}
-          <h1 className="text-5xl sm:text-6xl lg:text-[60px] xl:text-[66px] font-black text-white tracking-tight leading-[1.08] drop-shadow-lg animate-fade-in-up">
+          <h1 className="text-4xl sm:text-5xl xl:text-6xl font-black tracking-tight leading-[1.08] drop-shadow-sm font-sans">
             Simplify Workforce Operations.{' '}
-            <span className="block mt-1.5 bg-gradient-to-r from-teal-200 via-cyan-100 to-white bg-clip-text text-transparent">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 via-cyan-100 to-white">
               Streamline Every Day.
             </span>
           </h1>
 
-          {/* Sub-headline (Larger Size) */}
-          <p className="text-lg sm:text-xl lg:text-[21px] text-white/95 font-medium max-w-2xl leading-relaxed drop-shadow-sm animate-fade-in-up-delay-1">
-            Dayflow unifies employee records, real-time attendance, one-click time-off workflows, and automated payroll structures into a single intuitive platform.
+          <p className="text-slate-100 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed text-balance opacity-95">
+            Dayflow unifies employee records, real-time attendance, one-click time-off workflows, and automated 50/50 payroll structures into a single intuitive platform.
           </p>
 
-          {/* Feature Highlights (Larger Badges) */}
-          <div className="pt-2 flex flex-wrap gap-3 text-xs sm:text-sm font-semibold text-white/95 animate-fade-in-up-delay-2">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2 text-xs font-semibold text-white/90">
             <span className="px-4.5 py-2.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 flex items-center gap-2.5 shadow-sm hover:bg-white/25 transition-all duration-300 hover:scale-105 cursor-default">
               <CheckCircle2 className="w-4.5 h-4.5 text-teal-300 shrink-0" />
               <span>Unified Employee Records</span>
@@ -201,322 +169,340 @@ export const LoginForm = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Frosted Glass Form Card (Matching Image 1 & Wireframe) */}
+        {/* RIGHT COLUMN: Frosted Glass Form Card (Matching Wireframe Image 1 + UI Image 2) */}
         <div className="lg:col-span-6 xl:col-span-5 flex justify-center lg:justify-end">
-          <div className="glass-login-card rounded-[32px] w-full max-w-[430px] p-7 sm:p-9 shadow-2xl relative transition-all animate-fade-in">
-            
+          <div className="glass-login-card rounded-[32px] w-full max-w-[450px] p-7 sm:p-9 shadow-2xl relative transition-all animate-fade-in">
             {/* Logo & Brand Header */}
             <div className="flex items-center justify-center mb-6">
               <img
                 src={logo}
-                alt="DayFlow Human Resource Management System"
+                alt="DayFlow HRMS"
                 title="Dayflow HRMS"
                 className="w-full max-w-[280px] h-auto object-contain drop-shadow-sm"
               />
             </div>
 
             {/* Error Message */}
-            {errorMessage && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-500/20 backdrop-blur-md border border-rose-400/40 text-rose-950 text-xs flex items-start gap-2 animate-fade-in shadow-2xs font-medium">
+            {serverError && (
+              <div
+                role="alert"
+                className="mb-4 p-3 rounded-xl bg-rose-500/20 backdrop-blur-md border border-rose-400/40 text-rose-950 text-xs flex items-start gap-2 animate-fade-in shadow-2xs font-medium"
+              >
                 <AlertCircle className="w-4 h-4 text-rose-800 shrink-0 mt-0.5" />
-                <div className="leading-relaxed">{errorMessage}</div>
+                <div className="leading-relaxed">{serverError}</div>
               </div>
             )}
 
-            {/* ======================================================== */}
-            {/* VIEW A: SIGN IN FORM (Matching Image 1 & Wireframe) */}
-            {/* ======================================================== */}
+            {/* VIEW 1: SIGN IN PAGE (Wireframe Match) */}
             {!isSignUp ? (
-              <form className="space-y-4" onSubmit={handleSignInSubmit}>
-                {/* Login ID or Email Input */}
-                <div>
-                  <input
-                    type="text"
-                    required
-                    value={loginIdOrEmail}
-                    onChange={(e) => setLoginIdOrEmail(e.target.value)}
-                    placeholder="Login ID or Email"
-                    className="w-full glass-login-input rounded-xl px-4 py-3 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none transition-all shadow-2xs"
-                  />
-                </div>
+              <div className="space-y-5 animate-fade-in">
+                <form onSubmit={handleLoginSubmit(onLogin)} className="space-y-4" noValidate>
+                  {/* Login ID / Email */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-800 tracking-wide">
+                      Login Id/Email :-
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        {...registerLogin('loginId')}
+                        placeholder="e.g. admin@dayflow.internal or OIALJO20220001"
+                        aria-label="Login ID or Email"
+                        className="glass-login-input w-full px-4 py-3 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all"
+                      />
+                    </div>
+                    {loginErrors.loginId && (
+                      <p className="text-xs text-rose-600 font-semibold mt-1">
+                        {loginErrors.loginId.message}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Password Input with show/hide eye toggle */}
-                <div className="relative">
-                  <input
-                    type={showSignInPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full glass-login-input rounded-xl pl-4 pr-10 py-3 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none transition-all shadow-2xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSignInPassword(!showSignInPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 cursor-pointer"
-                  >
-                    {showSignInPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-
-                {/* Sign In Button */}
-                <div className="pt-1">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-[#0B1528] hover:bg-[#15233D] text-white py-3.5 px-4 rounded-xl text-xs font-bold shadow-lg shadow-slate-950/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                  >
-                    <span>Sign In to Dayflow</span>
-                    <span className="text-base leading-none">&rarr;</span>
-                  </button>
-                </div>
-
-                {/* Forgot Password */}
-                <div className="text-center pt-0.5">
-                  <button
-                    type="button"
-                    onClick={() => alert('Demo Credentials: Use "admin@dayflow.internal" with password "admin123" for Admin, or "OITODO0220001" with password "password123" for Employee.')}
-                    className="text-xs font-semibold text-slate-800 hover:text-slate-950 transition-colors cursor-pointer"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-
-                {/* Wireframe Toggle: Don't have an Account? Sign Up */}
-                <div className="pt-2 text-center border-t border-white/30">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setErrorMessage('');
-                      setIsSignUp(true);
-                    }}
-                    className="text-xs font-bold text-slate-900 hover:underline cursor-pointer"
-                  >
-                    Don't have an Account? <span className="text-teal-900 font-extrabold">Sign Up</span>
-                  </button>
-                </div>
-
-                {/* 1-Click Quick Demo Login Accordion */}
-                <div className="pt-2 border-t border-white/20">
-                  <button
-                    type="button"
-                    onClick={() => setShowDemoPersonas(!showDemoPersonas)}
-                    className="w-full flex items-center justify-between text-[11px] font-bold text-slate-800 hover:text-slate-950 py-1 cursor-pointer transition-colors"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-teal-800" />
-                      <span>1-Click Demo Personas</span>
-                    </span>
-                    {showDemoPersonas ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                  </button>
-
-                  {showDemoPersonas && (
-                    <div className="grid grid-cols-2 gap-2 mt-2 animate-fade-in">
+                  {/* Password */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-slate-800 tracking-wide">
+                      Password :-
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        {...registerLogin('password')}
+                        placeholder="••••••••"
+                        aria-label="Password"
+                        className="glass-login-input w-full pl-4 pr-10 py-3 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all"
+                      />
                       <button
                         type="button"
-                        onClick={() => handleQuickLogin('admin@dayflow.internal', 'admin123')}
-                        className="p-2 rounded-xl border border-white/60 bg-white/50 hover:bg-white/80 text-left transition-all cursor-pointer shadow-2xs"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
-                        <div className="text-[9px] font-bold text-purple-900 uppercase">Admin / HR 👑</div>
-                        <div className="text-xs font-bold text-slate-900">Sarah Williams</div>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleQuickLogin('OITODO0220001', 'password123')}
-                        className="p-2 rounded-xl border border-white/60 bg-white/50 hover:bg-white/80 text-left transition-all cursor-pointer shadow-2xs"
-                      >
-                        <div className="text-[9px] font-bold text-teal-900 uppercase">Employee 🟢</div>
-                        <div className="text-xs font-bold text-slate-900">Alex Johnson</div>
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                  )}
-                </div>
-              </form>
-            ) : (
-              /* ======================================================== */
-              /* VIEW B: SIGN UP FORM (Matching Wireframe Page 2) */
-              /* ======================================================== */
-              <form className="space-y-3 animate-fade-in" onSubmit={handleSignUpSubmit}>
-                {/* Header Title */}
-                <div className="text-center mb-1">
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    Create Employee / Company Account
-                  </h3>
-                  <p className="text-[11px] text-slate-700 font-medium">
-                    ID will be auto-generated per Wireframe Rule
-                  </p>
-                </div>
-
-                {/* Company Name + Upload Logo */}
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-800">
-                    Company Name :-
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      required
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="e.g. Odoo India"
-                      className="flex-1 glass-login-input rounded-xl px-3.5 py-2 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none shadow-2xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleLogoUploadSim}
-                      className="px-3 py-2 rounded-xl bg-white/50 hover:bg-white/80 border border-white/60 text-slate-800 text-xs font-bold flex items-center gap-1 cursor-pointer transition-all shadow-2xs shrink-0"
-                      title="Upload Logo"
-                    >
-                      <Upload className="w-3.5 h-3.5 text-teal-800" />
-                      <span className="hidden sm:inline text-[11px]">{companyLogoName ? 'Uploaded' : 'Logo'}</span>
-                    </button>
+                    {loginErrors.password && (
+                      <p className="text-xs text-rose-600 font-semibold mt-1">
+                        {loginErrors.password.message}
+                      </p>
+                    )}
                   </div>
-                </div>
 
-                {/* Name */}
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-800">
-                    Name :-
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. John Doe"
-                    className="w-full glass-login-input rounded-xl px-3.5 py-2 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none shadow-2xs"
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-800">
-                    Email :-
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="john.doe@company.internal"
-                    className="w-full glass-login-input rounded-xl px-3.5 py-2 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none shadow-2xs"
-                  />
-                </div>
-
-                {/* Phone */}
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-800">
-                    Phone :-
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className="w-full glass-login-input rounded-xl px-3.5 py-2 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none shadow-2xs"
-                  />
-                </div>
-
-                {/* Password with eye toggle */}
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-800">
-                    Password :-
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showSignUpPassword ? 'text' : 'password'}
-                      required
-                      value={signUpPassword}
-                      onChange={(e) => setSignUpPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full glass-login-input rounded-xl pl-3.5 pr-9 py-2 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none shadow-2xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSignUpPassword(!showSignUpPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 cursor-pointer"
-                    >
-                      {showSignUpPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm Password with eye toggle */}
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-800">
-                    Confirm Password :-
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full glass-login-input rounded-xl pl-3.5 pr-9 py-2 text-xs text-slate-900 font-medium placeholder:text-slate-600/80 focus:outline-none shadow-2xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 cursor-pointer"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Wireframe Rule Preview Badge */}
-                <div className="p-2 rounded-xl bg-white/40 border border-white/50 text-[11px] text-slate-800 flex items-center justify-between">
-                  <span className="font-medium">Derived Login ID:</span>
-                  <span className="font-mono font-bold text-teal-900 bg-white/60 px-2 py-0.5 rounded shadow-2xs">
-                    {previewLoginId}
-                  </span>
-                </div>
-
-                {/* Sign Up Button (Purple/Midnight per Wireframe) */}
-                <div className="pt-1">
+                  {/* SIGN IN Button */}
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-[#0B1528] hover:bg-[#15233D] text-white py-3 px-4 rounded-xl text-xs font-bold shadow-lg shadow-slate-950/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                    disabled={isLoggingIn}
+                    className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm tracking-wide shadow-lg shadow-slate-900/25 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-70 mt-3"
                   >
-                    <span>Sign Up</span>
-                    <ArrowRight className="w-4 h-4 text-teal-400" />
+                    {isLoggingIn ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <span>SIGN IN</span>
+                        <ArrowRight className="w-4 h-4 text-teal-300" />
+                      </>
+                    )}
                   </button>
-                </div>
+                </form>
 
-                {/* Wireframe Link: Already have an account ? Sign In */}
-                <div className="text-center pt-2 border-t border-white/30">
+                {/* Wireframe Switch Link: Don't have an Account? Sign Up */}
+                <div className="text-center pt-2">
                   <button
                     type="button"
                     onClick={() => {
-                      setErrorMessage('');
-                      setIsSignUp(false);
+                      setIsSignUp(true);
+                      setServerError('');
                     }}
-                    className="text-xs font-bold text-slate-900 hover:underline cursor-pointer"
+                    className="text-xs text-slate-700 font-semibold hover:text-slate-950 transition-colors cursor-pointer"
                   >
-                    Already have an account ? <span className="text-teal-900 font-extrabold">Sign In</span>
+                    Don't have an Account? <span className="text-teal-700 font-bold underline decoration-teal-500/50 underline-offset-4 hover:text-teal-900">Sign Up</span>
                   </button>
                 </div>
-              </form>
+              </div>
+            ) : (
+              /* VIEW 2: SIGN UP PAGE (Wireframe Match) */
+              <div className="space-y-4 animate-fade-in">
+                <form onSubmit={handleSignUpSubmit(onSignUp)} className="space-y-3" noValidate>
+                  {/* Company Name + Upload Logo Button */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-800">
+                        Company Name :-
+                      </label>
+                      <label className="inline-flex items-center gap-1 text-[11px] font-bold text-teal-800 bg-white/60 hover:bg-white px-2.5 py-1 rounded-lg border border-white/70 shadow-2xs cursor-pointer transition-all">
+                        <Upload className="w-3 h-3 text-teal-600" />
+                        <span>{uploadedLogoName ? 'Logo Uploaded' : 'Upload Logo'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              setUploadedLogoName(e.target.files[0].name);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <input
+                      type="text"
+                      {...registerSignUp('companyName')}
+                      placeholder="e.g. Odoo India"
+                      className="glass-login-input w-full px-3.5 py-2.5 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    />
+                    {signUpErrors.companyName && (
+                      <p className="text-xs text-rose-600 font-semibold">{signUpErrors.companyName.message}</p>
+                    )}
+                  </div>
+
+                  {/* Name :- */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Name :-
+                    </label>
+                    <input
+                      type="text"
+                      {...registerSignUp('name')}
+                      placeholder="e.g. John Doe"
+                      className="glass-login-input w-full px-3.5 py-2.5 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    />
+                    {signUpErrors.name && (
+                      <p className="text-xs text-rose-600 font-semibold">{signUpErrors.name.message}</p>
+                    )}
+                  </div>
+
+                  {/* Email :- */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Email :-
+                    </label>
+                    <input
+                      type="email"
+                      {...registerSignUp('email')}
+                      placeholder="john.doe@odoo.com"
+                      className="glass-login-input w-full px-3.5 py-2.5 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    />
+                    {signUpErrors.email && (
+                      <p className="text-xs text-rose-600 font-semibold">{signUpErrors.email.message}</p>
+                    )}
+                  </div>
+
+                  {/* Phone :- */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Phone :-
+                    </label>
+                    <input
+                      type="text"
+                      {...registerSignUp('phone')}
+                      placeholder="+91 98765 43210"
+                      className="glass-login-input w-full px-3.5 py-2.5 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    />
+                  </div>
+
+                  {/* Password :- */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Password :-
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        {...registerSignUp('password')}
+                        placeholder="••••••••"
+                        className="glass-login-input w-full pl-3.5 pr-9 py-2.5 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
+                      >
+                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    {signUpErrors.password && (
+                      <p className="text-xs text-rose-600 font-semibold">{signUpErrors.password.message}</p>
+                    )}
+                  </div>
+
+                  {/* Confirm Password :- */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Confirm Password :-
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        {...registerSignUp('confirmPassword')}
+                        placeholder="••••••••"
+                        className="glass-login-input w-full pl-3.5 pr-9 py-2.5 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                    {signUpErrors.confirmPassword && (
+                      <p className="text-xs text-rose-600 font-semibold">{signUpErrors.confirmPassword.message}</p>
+                    )}
+                  </div>
+
+                  {/* Live System Generated Login ID Indicator */}
+                  <div className="p-2.5 rounded-xl bg-teal-900/10 border border-teal-800/20 text-[11px] text-slate-800 flex items-center justify-between backdrop-blur-sm">
+                    <span className="font-semibold text-slate-700">Auto-Generated System ID:</span>
+                    <span className="font-mono font-bold text-teal-900 bg-white/70 px-2 py-0.5 rounded-md shadow-2xs">
+                      {previewLoginId}
+                    </span>
+                  </div>
+
+                  {/* Sign Up Button (Purple gradient matching wireframe) */}
+                  <button
+                    type="submit"
+                    disabled={isSigningUp}
+                    className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 text-white font-bold text-sm tracking-wide shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-70 mt-2"
+                  >
+                    {isSigningUp ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <span>Sign Up</span>
+                        <ArrowRight className="w-4 h-4 text-purple-200" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Wireframe Switch Link: Already have an account ? Sign In */}
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignUp(false);
+                      setServerError('');
+                    }}
+                    className="text-xs text-slate-700 font-semibold hover:text-slate-950 transition-colors cursor-pointer"
+                  >
+                    Already have an account ? <span className="text-teal-700 font-bold underline decoration-teal-500/50 underline-offset-4 hover:text-teal-900">Sign In</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Demo Personas Dropdown (Dev mode) */}
+            {import.meta.env.DEV && (
+              <div className="mt-5 pt-4 border-t border-slate-200/60">
+                <button
+                  type="button"
+                  onClick={() => setShowDemoPersonas(!showDemoPersonas)}
+                  className="w-full flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-slate-950 transition-colors py-1 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Layers className="w-3.5 h-3.5 text-teal-600" />
+                    <span>1-Click Demo Credentials</span>
+                  </span>
+                  {showDemoPersonas ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
+                </button>
+
+                {showDemoPersonas && (
+                  <div className="mt-3 space-y-2 animate-fade-in">
+                    <button
+                      type="button"
+                      onClick={() => applyPersona('admin@dayflow.internal', 'admin123')}
+                      className="w-full p-2.5 rounded-xl bg-white/70 hover:bg-white border border-teal-200/80 text-left transition-colors cursor-pointer shadow-2xs"
+                    >
+                      <div className="text-xs font-bold text-teal-950 flex items-center justify-between">
+                        <span>👑 HR Administrator (Sarah Williams)</span>
+                        <span className="text-[10px] font-mono text-teal-700 bg-teal-100 px-1.5 py-0.5 rounded">admin123</span>
+                      </div>
+                      <div className="text-[11px] text-teal-800/80 font-mono mt-0.5">admin@dayflow.internal</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => applyPersona('OIALJO20220001', 'employee123')}
+                      className="w-full p-2.5 rounded-xl bg-white/70 hover:bg-white border border-slate-200 text-left transition-colors cursor-pointer shadow-2xs"
+                    >
+                      <div className="text-xs font-bold text-slate-900 flex items-center justify-between">
+                        <span>👤 Alex Johnson (Employee)</span>
+                        <span className="text-[10px] font-mono text-slate-600 bg-slate-200 px-1.5 py-0.5 rounded">employee123</span>
+                      </div>
+                      <div className="text-[11px] text-slate-600 font-mono mt-0.5">OIALJO20220001</div>
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Credentials Delivery Modal (Shows generated Wireframe ID and allows 1-click login) */}
-      <CredentialsDeliveryModal
-        isOpen={!!newCredentials}
-        onClose={() => {
-          if (newCredentials) {
-            handleQuickLogin(newCredentials.loginId, newCredentials.initialPassword);
-          }
-          setNewCredentials(null);
-        }}
-        credentials={newCredentials}
-      />
     </div>
   );
 };
+
+export default LoginForm;
