@@ -19,8 +19,9 @@ export const Header = ({ onSearch, searchQuery, onSelectEmployee, activeTab }) =
   const [showNotifications, setShowNotifications] = useState(false);
 
   const getPageHeading = () => {
-    if (activeTab === 'EMPLOYEES') return currentUser?.name || 'Sarah Williams';
-    if (activeTab === 'ATTENDANCE') return 'Attendance Master';
+    if (activeTab === 'DASHBOARD') return currentUser?.name || 'Sarah Williams';
+    if (activeTab === 'EMPLOYEES') return 'Employees';
+    if (activeTab === 'ATTENDANCE') return 'Attendance Management';
     if (activeTab === 'LEAVE') return 'Time Off & Leave';
     if (activeTab === 'PAYROLL') return 'Payroll & Compensation';
     if (activeTab === 'ANALYTICS') return 'Reports & Analytics';

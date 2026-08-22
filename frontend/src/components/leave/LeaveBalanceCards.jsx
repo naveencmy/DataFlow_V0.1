@@ -9,7 +9,7 @@ export const LeaveBalanceCards = ({ leaves = [], employeeId }) => {
   const sickQuota = 10;
 
   const ptoUsed = empLeaves
-    .filter((l) => l.leaveType === 'Paid Time Off')
+    .filter((l) => l.leaveType === 'Paid Time Off' || l.leaveType === 'Paid Leave')
     .reduce((sum, l) => sum + (l.totalDays || 1), 0);
 
   const sickUsed = empLeaves

@@ -82,7 +82,7 @@ export const ApplyLeaveModal = ({ isOpen, onClose, employee }) => {
             onChange={(e) => setLeaveType(e.target.value)}
             className="w-full px-3.5 py-2.5 border border-slate-200/80 rounded-xl text-xs font-bold bg-slate-50/80 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all cursor-pointer"
           >
-            <option value="Paid Time Off">Paid Time Off (PTO) - Payable</option>
+            <option value="Paid Leave">Paid Leave (PTO) - Payable</option>
             <option value="Sick Leave">Sick Leave - Payable</option>
             <option value="Unpaid Leave">Unpaid Leave (LWP) - Payroll Deducted</option>
           </select>

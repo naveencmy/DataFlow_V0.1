@@ -204,17 +204,6 @@ export const EmployeeList = ({ onSelectEmployee, globalSearchQuery = '' }) => {
             </button>
           )}
         </div>
-
-        {/* Admin Action: Add Employee */}
-        {isAdmin && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl btn-primary text-xs font-bold shadow-2xs cursor-pointer transition-all"
-          >
-            <UserPlus className="w-4 h-4 text-teal-400" />
-            <span>Add New Employee</span>
-          </button>
-        )}
       </div>
 
       {/* 3-Column Employee Cards Grid (Matching Image 2 Layout) */}
