@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../../assets/logo.jpeg';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useConfig } from '../../context/ConfigContext.jsx';
 import {
@@ -60,20 +61,15 @@ export const Sidebar = ({ activeTab, onTabChange }) => {
   return (
     <aside className="w-60 bg-white border-r border-slate-200/80 min-h-screen flex flex-col justify-between shrink-0 select-none z-30 transition-all">
       {/* Brand Header */}
-      <div>
-        <div className="p-6 pb-5 flex items-center gap-3">
-          {/* Dayflow Logo Icon */}
-          <div className="w-9 h-9 rounded-2xl bg-teal-600 flex items-center justify-center text-white shadow-sm">
-            <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center">
-              <div className="w-1.5 h-1.5 bg-white rounded-full" />
-            </div>
-          </div>
-          <div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 font-sans">
-              Dayflow
-            </span>
-          </div>
-        </div>
+          {/* Brand Header */}
+<div>
+  <div className="p-6 pb-5 flex items-center justify-center">
+    <img
+      src={logo}
+      alt="DayFlow Logo"
+      className="w-full max-w-[210px] h-auto object-contain"
+    />
+  </div>
 
         {/* Navigation Links */}
         <nav className="px-3.5 space-y-1 mt-2">
