@@ -1,73 +1,58 @@
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
+import http from 'http';
+import app from './app.js';
+import { env } from './config/env.js';
+import { logger } from './config/logger.js';
+import { initializeDatabase, pgPool } from './config/db.js';
+import { initializeSocketServer } from './sockets/socket.server.js';
+import { initializeCronJobs } from './jobs/cron.js';
 
-import connectDB from './config/db.js';
-import { errorHandler, notFound } from './middleware/error.middleware.js';
+async function bootstrap() {
+  // 1. Initialize PostgreSQL
+  await initializeDatabase();
 
-// Routes
-import authRoutes from './routes/auth.routes.js';
-import employeesRoutes from './routes/employees.routes.js';
-import attendanceRoutes from './routes/attendance.routes.js';
-import leaveRoutes from './routes/leave.routes.js';
-import payrollRoutes from './routes/payroll.routes.js';
-import analyticsRoutes from './routes/analytics.routes.js';
-import notificationsRoutes from './routes/notifications.routes.js';
+  // 2. Create HTTP Server
+  const server = http.createServer(app);
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+  // 3. Initialize Socket.io Real-Time Server
+  initializeSocketServer(server);
 
-// ─── Connect to MongoDB ───────────────────────────────────────────────────────
-connectDB();
+  // 4. Initialize Background Cron Scheduler
+  initializeCronJobs();
 
-// ─── Core Middleware ──────────────────────────────────────────────────────────
-app.use(helmet());
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true,
-  })
-);
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
-
-// ─── Health Check ─────────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    service: 'Dayflow HRMS API',
-    version: '1.0.0',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
+  // 5. Start Listening
+  server.listen(env.PORT, () => {
+    logger.info(`
+    ╔══════════════════════════════════════════════════════════════╗
+    ║                 DAYFLOW HRMS BACKEND API                     ║
+    ║                                                              ║
+    ║   🚀 Server running on: http://localhost:${env.PORT}                ║
+    ║   📚 Swagger API Docs:  http://localhost:${env.PORT}/api-docs        ║
+    ║   ⚡ WebSocket:         ws://localhost:${env.PORT}/notifications   ║
+    ║   🐘 Database:          PostgreSQL 15                        ║
+    ║   🔴 Cache & Queue:     Redis 7 + BullMQ                     ║
+    ║   🌍 CORS Origin:       ${env.FRONTEND_URL}        ║
+    ╚══════════════════════════════════════════════════════════════╝
+    `);
   });
-});
 
-// ─── API Routes ───────────────────────────────────────────────────────────────
-app.use('/api/auth', authRoutes);
-app.use('/api/employees', employeesRoutes);
-app.use('/api/attendance', attendanceRoutes);
-app.use('/api/leaves', leaveRoutes);
-app.use('/api/payroll', payrollRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/notifications', notificationsRoutes);
+  // Graceful Shutdown
+  const shutdown = async (signal) => {
+    logger.info(`Received ${signal}. Shutting down gracefully...`);
+    server.close(async () => {
+      logger.info('HTTP server closed.');
+      await pgPool.end();
+      logger.info('PostgreSQL pool drained.');
+      process.exit(0);
+    });
+  };
 
-// ─── Error Handlers ───────────────────────────────────────────────────────────
-app.use(notFound);
-app.use(errorHandler);
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
 
-// ─── Start Server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`
-  ╔══════════════════════════════════════════╗
-  ║       Dayflow HRMS API v1.0.0           ║
-  ║   🚀 Server running on port ${PORT}         ║
-  ║   📡 MongoDB: Connected                 ║
-  ║   🌍 CORS: ${process.env.FRONTEND_URL || 'http://localhost:5173'} ║
-  ╚══════════════════════════════════════════╝
-  `);
+bootstrap().catch((err) => {
+  logger.error({ err }, '❌ Fatal server bootstrap error');
+  process.exit(1);
 });
 
 export default app;

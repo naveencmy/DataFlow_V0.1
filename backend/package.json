@@ -1,34 +1,62 @@
 {
   "name": "dayflow-hrms-backend",
   "version": "1.0.0",
-  "description": "Dayflow HRMS REST API — Node.js + Express + MongoDB",
+  "description": "Production-grade Dayflow HRMS REST API with N-Layer Architecture (JavaScript ES Modules + PostgreSQL + Prisma/PG)",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "seed": "node src/data/seed.js"
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push",
+    "prisma:studio": "prisma studio",
+    "seed": "node src/prisma/seed.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit",
+    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit --runInBand",
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration --runInBand"
   },
   "keywords": [
     "hrms",
     "dayflow",
     "express",
-    "mongodb"
+    "postgresql",
+    "prisma",
+    "redis",
+    "jwt",
+    "javascript",
+    "n-layer"
   ],
   "author": "Dayflow Technologies",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
+    "bullmq": "^5.34.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "express-validator": "^7.3.2",
     "helmet": "^8.3.0",
+    "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.9.3",
-    "morgan": "^1.11.0"
+    "morgan": "^1.11.0",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.16",
+    "pdfkit": "^0.16.0",
+    "pg": "^8.13.1",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0",
+    "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.14",
+    "pino-pretty": "^13.0.0",
+    "prisma": "^5.22.0",
+    "supertest": "^7.0.0"
   }
 }
