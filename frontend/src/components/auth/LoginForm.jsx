@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../../assets/logo.jpeg';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useHRMS } from '../../context/HRMSContext.jsx';
 import { useNotifications } from '../../context/NotificationContext.jsx';
@@ -206,21 +207,14 @@ export const LoginForm = () => {
             
             {/* Logo & Brand Header */}
             <div className="flex items-center justify-center gap-2.5 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-teal-400 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/30">
-                <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-6h2v6zm0-8h-2V7h2v2z" opacity="0.3"/>
-                  <path d="M12 3a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9-4.03-9-9-9zm0 16a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" />
-                  <circle cx="12" cy="12" r="3.5" />
-                </svg>
-              </div>
-
-              <span className="text-2xl font-black tracking-tight text-slate-900 font-sans">
-                Dayflow
-              </span>
-
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/60 text-slate-800 border border-white/70 shadow-2xs">
-                HRMS
-              </span>
+{/* Logo & Brand Header */}
+<div className="flex items-center justify-center mb-6">
+  <img
+    src={logo}
+    alt="DayFlow Human Resource Management System"
+    className="w-full max-w-[320px] h-auto object-contain"
+  />
+</div>
             </div>
 
             {/* Error Message */}
