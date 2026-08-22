@@ -1,6 +1,11 @@
 import { pgPool } from '../../config/db.js';
 
 export class AttendanceRepository {
+  async countEmployees() {
+    const res = await pgPool.query('SELECT COUNT(*) FROM "Employee"');
+    return parseInt(res.rows[0]?.count, 10) || 0;
+  }
+
   async findByEmployeeAndDate(employeeId, date) {
     const query = `
       SELECT * FROM "Attendance"
