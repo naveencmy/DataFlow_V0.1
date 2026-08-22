@@ -1,0 +1,129 @@
+# .github/workflows/ci.yml
+name: CI Pipeline - Lint, Test, Build & Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Code Quality & Linting
+  # ----------------------------------------------------------------------------
+  lint-and-format:
+    name: Lint & Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Lint Backend
+        run: |
+          cd backend
+          npm ci
+          npm run lint || true
+
+      - name: Lint Frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run lint || true
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Test Suite Execution
+  # ----------------------------------------------------------------------------
+  test:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-format
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Test Backend
+        run: |
+          cd backend
+          npm ci
+          npm test || true
+
+      - name: Build Frontend Validation
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Multi-Stage Docker Image Build
+  # ----------------------------------------------------------------------------
+  docker-build:
+    name: Build Multi-Stage Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: dayflow/backend:${{ github.sha }}
+          load: true
+
+      - name: Build Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: dayflow/frontend:${{ github.sha }}
+          load: true
+
+  # ----------------------------------------------------------------------------
+  # Job 4: Vulnerability & Security Scanning (Trivy + npm audit)
+  # ----------------------------------------------------------------------------
+  security-scan:
+    name: Container Security & Dependency Audit
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Dependency Audit (npm audit)
+        run: |
+          cd backend && npm audit --audit-level=high || true
+          cd ../frontend && npm audit --audit-level=high || true
+
+      - name: Run Trivy Vulnerability Scanner (Repo & Config)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'

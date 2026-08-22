@@ -1,0 +1,170 @@
+# docker-compose.prod.yml
+# ==============================================================================
+# Dayflow HRMS - Production Self-Hosted / EC2 Docker Compose Topology
+# Hardened PostgreSQL 15, Redis 7, Nginx reverse proxy with SSL Certbot
+# ==============================================================================
+
+version: '3.8'
+
+networks:
+  hrms-network:
+    driver: bridge
+    internal: false
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  certbot_www:
+    driver: local
+  certbot_conf:
+    driver: local
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PostgreSQL Database (Persistent Storage, Isolated)
+  # ----------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: dayflow-prod-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dayflow_hrms}
+      POSTGRES_USER: ${POSTGRES_USER:-dayflow_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hrms-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 2048M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dayflow_admin} -d ${POSTGRES_DB:-dayflow_hrms}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------------------------
+  # 2. Redis Cache
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: dayflow-prod-redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-secure_redis_password_dayflow}
+    volumes:
+      - redis_data:/data
+    networks:
+      - hrms-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-secure_redis_password_dayflow}", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------------------------
+  # 3. Application API Service
+  # ----------------------------------------------------------------------------
+  app:
+    image: ${DOCKER_REGISTRY:-dayflow}/backend:${IMAGE_TAG:-latest}
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dayflow-prod-backend
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      SERVICE_VERSION: ${IMAGE_TAG:-1.0.0}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-dayflow_admin}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-dayflow_hrms}?schema=public}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-secure_redis_password_dayflow}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      FRONTEND_URL: ${FRONTEND_URL:-https://app.dayflow.io}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ----------------------------------------------------------------------------
+  # 4. Nginx Edge Reverse Proxy + Static SPA Host
+  # ----------------------------------------------------------------------------
+  web:
+    image: nginx:alpine
+    container_name: dayflow-prod-web
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - hrms-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ----------------------------------------------------------------------------
+  # 5. Let's Encrypt Certbot Auto-Renewal Agent
+  # ----------------------------------------------------------------------------
+  certbot:
+    image: certbot/certbot:latest
+    container_name: dayflow-prod-certbot
+    volumes:
+      - certbot_www:/var/www/certbot:rw
+      - certbot_conf:/etc/letsencrypt:rw
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - hrms-network

@@ -1,0 +1,17 @@
+# infra/terraform/terraform.tfvars.example
+aws_region           = "us-east-1"
+environment          = "prod"
+project_name         = "dayflow-hrms"
+domain_name          = "dayflow.io"
+
+db_instance_class    = "db.t3.small"
+db_allocated_storage = 20
+db_name              = "dayflow_hrms"
+db_username          = "dayflow_admin"
+db_password          = "SuperStrongMasterPassword123!"
+
+jwt_secret           = "super_secure_jwt_token_secret_for_production_use"
+redis_node_type      = "cache.t3.micro"
+
+backend_min_capacity = 2
+backend_max_capacity = 10

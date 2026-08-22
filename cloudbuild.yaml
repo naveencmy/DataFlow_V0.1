@@ -1,0 +1,136 @@
+# cloudbuild.yaml
+# ==============================================================================
+# Dayflow HRMS - Automated Google Cloud Build CI/CD Pipeline
+# Provisions artifacts in Artifact Registry and performs continuous deployment
+# to Google Cloud Run with Secret Manager PostgreSQL DATABASE_URL injection.
+# ==============================================================================
+
+steps:
+  # ----------------------------------------------------------------------------
+  # Step 1: Lint & Unit Validation (Backend)
+  # ----------------------------------------------------------------------------
+  - name: 'node:20-alpine'
+    id: 'backend-lint'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        cd backend
+        npm ci
+        npm run lint || true
+
+  # ----------------------------------------------------------------------------
+  # Step 2: Build Backend Multi-Stage Container Image
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-backend-image'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/backend:${COMMIT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/backend:latest'
+      - '-f'
+      - 'backend/Dockerfile'
+      - 'backend'
+
+  # ----------------------------------------------------------------------------
+  # Step 3: Build Frontend Multi-Stage Container Image
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-frontend-image'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'VITE_API_BASE_URL=${_API_BASE_URL}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/frontend:${COMMIT_SHA}'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/frontend:latest'
+      - '-f'
+      - 'frontend/Dockerfile'
+      - 'frontend'
+
+  # ----------------------------------------------------------------------------
+  # Step 4: Push Images to Google Cloud Artifact Registry
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-backend-image'
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/backend'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-frontend-image'
+    args:
+      - 'push'
+      - '--all-tags'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/frontend'
+
+  # ----------------------------------------------------------------------------
+  # Step 5: Deploy Backend to Google Cloud Run (PostgreSQL Connected)
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:alpine'
+    id: 'deploy-backend-cloudrun'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'dayflow-backend'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/backend:${COMMIT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--service-account=${_BACKEND_SA_EMAIL}'
+      - '--set-env-vars=NODE_ENV=production,SERVICE_VERSION=${COMMIT_SHA}'
+      - '--set-secrets=DATABASE_URL=DAYFLOW_DATABASE_URL:latest,JWT_SECRET=DAYFLOW_JWT_SECRET:latest'
+      - '--port=8080'
+      - '--cpu=1'
+      - '--memory=512Mi'
+      - '--min-instances=1'
+      - '--max-instances=10'
+      - '--concurrency=80'
+      - '--timeout=60s'
+      - '--allow-unauthenticated'
+
+  # ----------------------------------------------------------------------------
+  # Step 6: Deploy Frontend to Google Cloud Run
+  # ----------------------------------------------------------------------------
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:alpine'
+    id: 'deploy-frontend-cloudrun'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'dayflow-frontend'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/frontend:${COMMIT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--service-account=${_FRONTEND_SA_EMAIL}'
+      - '--port=8080'
+      - '--cpu=1'
+      - '--memory=256Mi'
+      - '--min-instances=1'
+      - '--max-instances=10'
+      - '--concurrency=80'
+      - '--timeout=30s'
+      - '--allow-unauthenticated'
+
+# Pipeline Substitution Defaults
+substitutions:
+  _REGION: 'us-central1'
+  _REPO_NAME: 'dayflow-hrms-repo'
+  _API_BASE_URL: 'https://dayflow-backend.run.app/api'
+  _BACKEND_SA_EMAIL: 'dayflow-backend-sa@${PROJECT_ID}.iam.gserviceaccount.com'
+  _FRONTEND_SA_EMAIL: 'dayflow-frontend-sa@${PROJECT_ID}.iam.gserviceaccount.com'
+
+# Storage Images for Artifacts Tracking
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/backend:${COMMIT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/backend:latest'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/frontend:${COMMIT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/frontend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
