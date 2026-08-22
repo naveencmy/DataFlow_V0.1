@@ -54,7 +54,7 @@ export const AttendancePage = () => {
               disabled={checkInMutation.isPending}
               className="py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
             >
-              {checkInMutation.isPending ? 'Logging...' : 'Check In 🟢'}
+              {checkInMutation.isPending ? 'Logging...' : 'Check In '}
             </button>
           ) : !isCheckedOut ? (
             <button
@@ -62,7 +62,7 @@ export const AttendancePage = () => {
               disabled={checkOutMutation.isPending}
               className="py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
             >
-              {checkOutMutation.isPending ? 'Logging...' : 'Check Out 🔴'}
+              {checkOutMutation.isPending ? 'Logging...' : 'Check Out '}
             </button>
           ) : null}
         </div>
@@ -119,13 +119,12 @@ export const AttendancePage = () => {
                     <td className="py-4 px-6 font-mono font-bold text-slate-900">{row.workHours > 0 ? `${row.workHours} hrs` : '—'}</td>
                     <td className="py-4 px-6">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${
-                          row.status === 'PRESENT' || row.status === 'Present'
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${row.status === 'PRESENT' || row.status === 'Present'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : row.status === 'ON_LEAVE' || row.status === 'Leave'
-                            ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                        }`}
+                              ? 'bg-sky-50 text-sky-700 border border-sky-200'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-current" />
                         {row.status}

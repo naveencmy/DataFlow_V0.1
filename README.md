@@ -1,4 +1,4 @@
-# 🏷️ Dayflow HRMS — Next-Generation Enterprise Workforce Platform
+# Dayflow V0.1HRMS — Next-Generation Enterprise Workforce Platform
 
 <div align="center">
 
@@ -18,42 +18,42 @@
 
 ---
 
-## 📋 Table of Contents
-- [✨ Key Capabilities & Features](#-key-capabilities--features)
-- [🏛️ System Architecture](#%EF%B8%8F-system-architecture)
-- [🛠️ Technology Stack](#%EF%B8%8F-technology-stack)
-- [🚀 Getting Started](#-getting-started)
+##  Table of Contents
+- [ Key Capabilities & Features](#-key-capabilities--features)
+- [ System Architecture](#%EF%B8%8F-system-architecture)
+- [ Technology Stack](#%EF%B8%8F-technology-stack)
+- [ Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
   - [Quickstart with Docker](#quickstart-with-docker)
   - [Manual Local Setup](#manual-local-setup)
-- [👥 Seeded Demo Accounts](#-seeded-demo-accounts)
-- [📡 API Reference & Documentation](#-api-reference--documentation)
-- [💡 Usage & Code Examples](#-usage--code-examples)
-- [📂 Repository Directory Structure](#-repository-directory-structure)
-- [🗺️ Strategic Roadmap](#%EF%B8%8F-strategic-roadmap)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+- [ Seeded Demo Accounts](#-seeded-demo-accounts)
+- [ API Reference & Documentation](#-api-reference--documentation)
+- [ Usage & Code Examples](#-usage--code-examples)
+- [ Repository Directory Structure](#-repository-directory-structure)
+- [ Strategic Roadmap](#%EF%B8%8F-strategic-roadmap)
+- [ Contributing](#-contributing)
+- [License](#-license)
 
 ---
 
 ## ✨ Key Capabilities & Features
 
-### 1. 🔐 Split-Screen Aurora Authentication & Wireframe Identity Provisioning
+### 1.  Split-Screen Aurora Authentication & Wireframe Identity Provisioning
 * **Dual-Token JWT Security**: 15-minute access tokens paired with 7-day cryptographically stored refresh tokens, cookie-parser, and sliding window rate limiting (10 requests / 15 min via Redis).
 * **Automated Login ID Engine**: Strict algorithmic ID generation (`[Prefix][Initials][Year][Serial]`, e.g., `OITKASU0220001`) with automatic credential delivery via Brevo SMTP relay.
 * **Granular Role-Based Access Control (RBAC)**: Enforces least-privilege security between `ADMIN`, `HR`, and `EMPLOYEE` roles, preventing unauthorized access to sensitive financial records.
 
-### 2. 🕒 Real-Time Digital Timecard & Attendance Derivation
+### 2. Real-Time Digital Timecard & Attendance Derivation
 * **One-Click Check-In / Check-Out Terminal**: Immutable timestamp capture with geo/work-mode contextual tagging.
 * **Automated Overtime & Work Hours**: Real-time evaluation against standard 8-hour workday schedules, calculating exact decimal work hours and overtime derivation.
-* **3-State Dynamic Status**: Live organization-wide derivation of `Present` 🟢, `On Leave` ✈️, and `Absent` 🟡.
+* **3-State Dynamic Status**: Live organization-wide derivation of `Present` , `On Leave` , and `Absent` .
 
-### 3. 🏖️ Atomic Time-Off & Multi-Type Leave Workflows
+### 3. Atomic Time-Off & Multi-Type Leave Workflows
 * **Comprehensive Leave Categories**: Paid Time Off (PTO), Sick Leave, Casual Leave, and Unpaid Leave.
 * **Atomic Database Transactions**: Approving a leave atomically invokes a PostgreSQL transaction (`BEGIN...COMMIT`) that creates corresponding `Attendance` records.
 * **Leave Balances & Quota Auditing**: Transparent balance accounting connected to monthly payroll deductions.
 
-### 4. 💰 Statutory 50/50 Indian Payroll Calculation Engine
+### 4. Statutory 50/50 Indian Payroll Calculation Engine
 * **Automated CTC Breakdown**: Strict compliance with Indian payroll norms:
   * **Basic Salary**: Exactly 50% of monthly gross wage.
   * **House Rent Allowance (HRA)**: Exactly 50% of basic salary (25% of gross wage).
@@ -62,7 +62,7 @@
 * **Attendance Multipliers**: Integrates unpaid leave multipliers to compute pro-rated gross earned wage and net payable amounts.
 * **PDFKit Payslip Streaming**: Instant binary PDF generation (`/api/v1/payroll/:id/slip`) with itemized allowances and tax breakdowns.
 
-### 5. 📊 Executive Analytics & Real-Time Telemetry
+### 5.  Executive Analytics & Real-Time Telemetry
 * **Real-Time KPI Metric Cards**: Live database aggregations of Total Headcount, Active Check-Ins, Approved Leaves, and Total Payouts.
 * **Interactive Recharts Visualizations**: Categorical breakdown of department workforce distribution and leave utilization.
 * **WebSocket Alerts**: Event-driven notifications via Socket.io (`/notifications` namespace).
