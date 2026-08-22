@@ -5,7 +5,7 @@ import { logger } from '../config/logger.js';
 
 const today = new Date().toISOString().split('T')[0];
 
-const INITIAL_USERS = [
+export const INITIAL_USERS = [
   {
     id: 'user-admin',
     loginId: 'admin@dayflow.internal',
@@ -14,84 +14,84 @@ const INITIAL_USERS = [
   },
   {
     id: 'user-emp-1',
-    loginId: 'OITODO0220001',
-    email: 'alex.johnson@dayflow.internal',
+    loginId: 'OITKASU0220001',
+    email: 'karthik.sundaram@dayflow.internal',
     role: 'EMPLOYEE',
     employeeId: 'emp-1',
   },
   {
     id: 'user-emp-2',
-    loginId: 'OITPS0220002',
-    email: 'priya.sharma@dayflow.internal',
+    loginId: 'OITANRA0220002',
+    email: 'ananya.ramaswamy@dayflow.internal',
     role: 'EMPLOYEE',
     employeeId: 'emp-2',
   },
   {
     id: 'user-emp-3',
-    loginId: 'OITMC0220003',
-    email: 'marcus.chen@dayflow.internal',
+    loginId: 'OITSEMU0220003',
+    email: 'senthil.murugan@dayflow.internal',
     role: 'EMPLOYEE',
     employeeId: 'emp-3',
   },
   {
     id: 'user-emp-4',
-    loginId: 'OITSW0220004',
-    email: 'sarah.williams@dayflow.internal',
+    loginId: 'OITKABA0220004',
+    email: 'kavitha.balasubramanian@dayflow.internal',
     role: 'HR',
     employeeId: 'emp-4',
   },
   {
     id: 'user-emp-5',
-    loginId: 'OITDK0220005',
-    email: 'david.kim@dayflow.internal',
+    loginId: 'OITDIRA0220005',
+    email: 'dinesh.rajendran@dayflow.internal',
     role: 'EMPLOYEE',
     employeeId: 'emp-5',
   },
 ];
 
-const INITIAL_EMPLOYEES = [
+export const INITIAL_EMPLOYEES = [
   {
     id: 'emp-1',
     userId: 'user-emp-1',
-    loginId: 'OITODO0220001',
-    name: 'Alex Johnson',
-    email: 'alex.johnson@dayflow.internal',
-    mobile: '+91 98765 43210',
-    profilePicture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=faces',
+    loginId: 'OITKASU0220001',
+    name: 'Karthik Sundaram',
+    email: 'karthik.sundaram@dayflow.internal',
+    mobile: '+91 98401 23456',
+    profilePicture: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop&crop=faces',
     department: 'Engineering',
     jobPosition: 'Lead Frontend Architect',
-    manager: 'Sarah Williams',
-    location: 'Bangalore Tech Hub',
+    manager: 'Kavitha Balasubramanian',
+    location: 'Chennai Tech Park, Taramani',
     company: 'Dayflow Technologies Pvt Ltd',
     dateOfJoining: '2022-03-15',
     dateOfBirth: '1992-06-18',
-    residentialAddress: '#402, Pine Grove Apts, 12th Main, Indiranagar, Bangalore, Karnataka 560038',
+    residentialAddress: 'Flat 4B, Shanthi Niketan Apts, 4th Main Road, Adyar, Chennai, Tamil Nadu 600020',
     nationality: 'Indian',
-    personalEmail: 'alex.j.personal@gmail.com',
-    gender: 'Non-Binary',
+    personalEmail: 'karthik.sundaram.dev@gmail.com',
+    gender: 'Male',
     maritalStatus: 'Single',
-    about: 'Passionate UI/UX architect obsessed with fluid interaction design, performance optimizations, and design system engineering.',
-    whatILoveAboutMyJob: 'The collaborative autonomy, solving complex workflow ergonomics, and seeing our HR tools empower thousands of daily workdays.',
-    interestsAndHobbies: 'Algorithmic sound synthesis, road cycling, specialty pour-over coffee brewing, and open-source contribution.',
+    about: 'Passionate UI architect specializing in high-performance web systems, component ergonomical design, and micro-frontend orchestration.',
+    whatILoveAboutMyJob: 'Collaborating across multidisciplinary engineering hubs and building friction-free HR tools that elevate daily employee work lives.',
+    interestsAndHobbies: 'Carnatic violin, amateur astrophotography, filter coffee brewing, and open source web standards contribution.',
     skills: [
-      { id: 'sk-1', name: 'React & TypeScript', level: 'Expert' },
+      { id: 'sk-1', name: 'React 19 & TypeScript', level: 'Expert' },
       { id: 'sk-2', name: 'Tailwind CSS & Design Systems', level: 'Expert' },
       { id: 'sk-3', name: 'State Management & Web Performance', level: 'Advanced' },
-      { id: 'sk-4', name: 'UI Ergonomics & Accessibility (a11y)', level: 'Advanced' },
+      { id: 'sk-4', name: 'UI Ergonomics & Web Accessibility (a11y)', level: 'Advanced' },
     ],
     certifications: [
       { id: 'cert-1', name: 'Meta Certified Front-End Developer', issuer: 'Meta / Coursera', issueYear: '2023' },
       { id: 'cert-2', name: 'AWS Certified Cloud Practitioner', issuer: 'Amazon Web Services', issueYear: '2022' },
     ],
     documents: [
-      { id: 'doc-1', title: 'Employment Contract & Offer Letter', fileName: 'Alex_Johnson_Employment_Agreement.pdf', fileSize: '1.8 MB', uploadDate: '2022-03-15', category: 'Contract' },
-      { id: 'doc-2', title: 'Aadhaar & PAN Verification Card', fileName: 'Alex_ID_Proofs_Combined.pdf', fileSize: '2.4 MB', uploadDate: '2022-03-16', category: 'ID Proof' },
+      { id: 'doc-1', title: 'Employment Contract & Offer Letter', fileName: 'Karthik_Sundaram_Employment_Deed.pdf', fileSize: '1.8 MB', uploadDate: '2022-03-15', category: 'Contract' },
+      { id: 'doc-2', title: 'Aadhaar & PAN Verification Card', fileName: 'Karthik_ID_Proofs_Combined.pdf', fileSize: '2.4 MB', uploadDate: '2022-03-16', category: 'ID Proof' },
     ],
     bankDetails: {
       accountNumber: '91823746192837',
-      bankName: 'HDFC Bank Ltd',
-      ifscCode: 'HDFC0001234',
-      panNumber: 'ABCDE1234F',
+      bankName: 'Indian Bank',
+      ifscCode: 'IDIB000A020',
+      panNumber: 'ABCKS1234F',
       uanNumber: '100987654321',
       employeeCode: 'DF-ENG-042',
     },
@@ -110,42 +110,42 @@ const INITIAL_EMPLOYEES = [
   {
     id: 'emp-2',
     userId: 'user-emp-2',
-    loginId: 'OITPS0220002',
-    name: 'Priya Sharma',
-    email: 'priya.sharma@dayflow.internal',
-    mobile: '+91 91234 56780',
+    loginId: 'OITANRA0220002',
+    name: 'Ananya Ramaswamy',
+    email: 'ananya.ramaswamy@dayflow.internal',
+    mobile: '+91 94440 98765',
     profilePicture: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=faces',
     department: 'Human Resources',
     jobPosition: 'People Operations Specialist',
-    manager: 'Sarah Williams',
-    location: 'Bangalore Tech Hub',
+    manager: 'Kavitha Balasubramanian',
+    location: 'Chennai Tech Park, Taramani',
     company: 'Dayflow Technologies Pvt Ltd',
     dateOfJoining: '2023-01-10',
     dateOfBirth: '1995-11-24',
-    residentialAddress: 'Flat 12B, Skyline Towers, Outer Ring Road, Bellandur, Bangalore 560103',
+    residentialAddress: 'Door No. 12, Sundaram Avenue, RA Puram, Chennai, Tamil Nadu 600028',
     nationality: 'Indian',
-    personalEmail: 'priya.sharma.hr@outlook.com',
+    personalEmail: 'ananya.ramaswamy.hr@outlook.com',
     gender: 'Female',
     maritalStatus: 'Married',
-    about: 'Dedicated to cultivating an inclusive, high-trust workplace culture and building friction-free onboarding experiences.',
-    whatILoveAboutMyJob: 'Fostering genuine career growth, listening to team needs, and making every employee feel valued from day one.',
-    interestsAndHobbies: 'Classical Hindustani music, weekend pottery workshops, marathon running, and reading historical fiction.',
+    about: 'Dedicated to cultivating an empathetic, high-trust workplace culture and building seamless onboarding journeys for every team member.',
+    whatILoveAboutMyJob: 'Fostering genuine career growth, listening to team needs, and making every new joiner feel welcomed from day one.',
+    interestsAndHobbies: 'Bharatanatyam, weekend pottery workshops, marathon running along Marina Beach, and reading historical Tamil literature.',
     skills: [
-      { id: 'sk-5', name: 'Talent Acquisition & Onboarding', level: 'Expert' },
-      { id: 'sk-6', name: 'Payroll Compliance & Labor Law', level: 'Advanced' },
-      { id: 'sk-7', name: 'Employee Engagement Strategy', level: 'Advanced' },
+      { id: 'sk-5', name: 'Talent Acquisition & Global Onboarding', level: 'Expert' },
+      { id: 'sk-6', name: 'Indian Payroll Compliance & Labor Law', level: 'Advanced' },
+      { id: 'sk-7', name: 'Employee Engagement & Culture Strategy', level: 'Advanced' },
     ],
     certifications: [
       { id: 'cert-3', name: 'SHRM Certified Professional (SHRM-CP)', issuer: 'SHRM', issueYear: '2023' },
     ],
     documents: [
-      { id: 'doc-3', title: 'HR Specialist Offer Letter', fileName: 'Priya_Sharma_Offer.pdf', fileSize: '1.2 MB', uploadDate: '2023-01-10', category: 'Contract' },
+      { id: 'doc-3', title: 'HR Specialist Offer Letter', fileName: 'Ananya_Ramaswamy_Offer.pdf', fileSize: '1.2 MB', uploadDate: '2023-01-10', category: 'Contract' },
     ],
     bankDetails: {
       accountNumber: '44556677889900',
-      bankName: 'ICICI Bank Ltd',
-      ifscCode: 'ICIC0000456',
-      panNumber: 'PQRST5678G',
+      bankName: 'Canara Bank',
+      ifscCode: 'CNRB0000456',
+      panNumber: 'PQRAR5678G',
       uanNumber: '100876543210',
       employeeCode: 'DF-HR-019',
     },
@@ -164,42 +164,42 @@ const INITIAL_EMPLOYEES = [
   {
     id: 'emp-3',
     userId: 'user-emp-3',
-    loginId: 'OITMC0220003',
-    name: 'Marcus Chen',
-    email: 'marcus.chen@dayflow.internal',
-    mobile: '+91 99887 76655',
+    loginId: 'OITSEMU0220003',
+    name: 'Senthil Murugan',
+    email: 'senthil.murugan@dayflow.internal',
+    mobile: '+91 98940 55443',
     profilePicture: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=faces',
     department: 'Product',
     jobPosition: 'Senior Product Manager',
-    manager: 'Sarah Williams',
-    location: 'Bangalore Tech Hub',
+    manager: 'Kavitha Balasubramanian',
+    location: 'Coimbatore Innovation Hub',
     company: 'Dayflow Technologies Pvt Ltd',
     dateOfJoining: '2021-08-01',
     dateOfBirth: '1989-03-12',
-    residentialAddress: 'Villa 18, Palm Meadows, Whitefield, Bangalore 560066',
+    residentialAddress: 'Villa 18, Green Meadows, Avinashi Road, Peelamedu, Coimbatore, Tamil Nadu 641004',
     nationality: 'Indian',
-    personalEmail: 'marcus.chen.pm@gmail.com',
+    personalEmail: 'senthil.murugan.pm@gmail.com',
     gender: 'Male',
     maritalStatus: 'Married',
-    about: 'Product strategist bridging deep user empathy with data-driven roadmapping and metric execution.',
-    whatILoveAboutMyJob: 'Transforming ambiguous workplace friction into seamless, high-retention software experiences.',
-    interestsAndHobbies: 'Amateur photography, scuba diving, strategy board games, and chess.',
+    about: 'Product strategist bridging deep user empathy with data-driven roadmapping and metric execution across workforce software.',
+    whatILoveAboutMyJob: 'Transforming complex administrative friction into intuitive, delightfully simple software interactions.',
+    interestsAndHobbies: 'Trekking in Nilgiris, chess strategy, landscape photography, and temple architecture documentation.',
     skills: [
-      { id: 'sk-8', name: 'Product Roadmapping & OKRs', level: 'Expert' },
-      { id: 'sk-9', name: 'User Journey Mapping & Specs', level: 'Expert' },
+      { id: 'sk-8', name: 'Product Roadmapping & Enterprise OKRs', level: 'Expert' },
+      { id: 'sk-9', name: 'User Journey Mapping & PRD Architecture', level: 'Expert' },
       { id: 'sk-10', name: 'A/B Testing & Metrics Analytics', level: 'Advanced' },
     ],
     certifications: [
       { id: 'cert-4', name: 'Certified Scrum Product Owner (CSPO)', issuer: 'Scrum Alliance', issueYear: '2021' },
     ],
     documents: [
-      { id: 'doc-4', title: 'Product Director NDA & Agreement', fileName: 'Marcus_Chen_Agreement.pdf', fileSize: '2.1 MB', uploadDate: '2021-08-01', category: 'Contract' },
+      { id: 'doc-4', title: 'Product Director NDA & Agreement', fileName: 'Senthil_Murugan_Agreement.pdf', fileSize: '2.1 MB', uploadDate: '2021-08-01', category: 'Contract' },
     ],
     bankDetails: {
       accountNumber: '11223344556677',
-      bankName: 'Axis Bank Ltd',
-      ifscCode: 'UTIB0000789',
-      panNumber: 'LMNOP9012K',
+      bankName: 'HDFC Bank Ltd',
+      ifscCode: 'HDFC0000789',
+      panNumber: 'LMNSM9012K',
       uanNumber: '100765432109',
       employeeCode: 'DF-PRD-007',
     },
@@ -218,42 +218,42 @@ const INITIAL_EMPLOYEES = [
   {
     id: 'emp-4',
     userId: 'user-emp-4',
-    loginId: 'OITSW0220004',
-    name: 'Sarah Williams',
-    email: 'sarah.williams@dayflow.internal',
-    mobile: '+91 98450 11223',
+    loginId: 'OITKABA0220004',
+    name: 'Kavitha Balasubramanian',
+    email: 'kavitha.balasubramanian@dayflow.internal',
+    mobile: '+91 98410 77889',
     profilePicture: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=faces',
     department: 'Management',
     jobPosition: 'VP of Engineering & HR',
     manager: 'Board of Directors',
-    location: 'Bangalore Tech Hub',
+    location: 'Chennai Tech Park, Taramani',
     company: 'Dayflow Technologies Pvt Ltd',
     dateOfJoining: '2020-01-05',
     dateOfBirth: '1985-09-03',
-    residentialAddress: 'Penthouse 7, Regency Heights, Koramangala 4th Block, Bangalore 560034',
+    residentialAddress: 'Penthouse 7, Horizon Tower, OMR Expressway, Thoraipakkam, Chennai, Tamil Nadu 600097',
     nationality: 'Indian',
-    personalEmail: 'sarah.williams.exec@gmail.com',
+    personalEmail: 'kavitha.balasubramanian.exec@gmail.com',
     gender: 'Female',
     maritalStatus: 'Married',
-    about: 'Executive leader passionate about scaling high-velocity engineering organizations with balanced human-centered values.',
-    whatILoveAboutMyJob: 'Empowering smart leaders to do the best work of their lives while maintaining balance.',
-    interestsAndHobbies: 'Triathlon training, classical piano, angel investing, and mentorship.',
+    about: 'Executive leader passionate about scaling high-velocity engineering organizations with balanced human-centered values and robust governance.',
+    whatILoveAboutMyJob: 'Empowering smart leaders to do the best work of their lives while maintaining culture, balance, and operational excellence.',
+    interestsAndHobbies: 'Marathon training along ECR, classical Veena recital, angel mentorship for women in tech, and rooftop gardening.',
     skills: [
-      { id: 'sk-11', name: 'Organizational Leadership', level: 'Expert' },
-      { id: 'sk-12', name: 'System Architecture & Scale', level: 'Expert' },
+      { id: 'sk-11', name: 'Organizational Leadership & Scaling', level: 'Expert' },
+      { id: 'sk-12', name: 'Cloud Architecture & Enterprise Security', level: 'Expert' },
       { id: 'sk-13', name: 'Strategic Budgeting & Payroll Planning', level: 'Expert' },
     ],
     certifications: [
-      { id: 'cert-5', name: 'Executive Leadership Certification', issuer: 'Stanford GSB', issueYear: '2020' },
+      { id: 'cert-5', name: 'Executive Leadership Certification', issuer: 'IIM Bangalore / Stanford GSB', issueYear: '2020' },
     ],
     documents: [
-      { id: 'doc-5', title: 'Executive Employment Deed', fileName: 'Sarah_Williams_Deed.pdf', fileSize: '3.4 MB', uploadDate: '2020-01-05', category: 'Contract' },
+      { id: 'doc-5', title: 'Executive Employment Deed', fileName: 'Kavitha_Balasubramanian_Deed.pdf', fileSize: '3.4 MB', uploadDate: '2020-01-05', category: 'Contract' },
     ],
     bankDetails: {
       accountNumber: '99887766554433',
       bankName: 'State Bank of India',
       ifscCode: 'SBIN0001999',
-      panNumber: 'WXYZ9876Q',
+      panNumber: 'WXYKB9876Q',
       uanNumber: '100654321098',
       employeeCode: 'DF-EXE-001',
     },
@@ -272,42 +272,42 @@ const INITIAL_EMPLOYEES = [
   {
     id: 'emp-5',
     userId: 'user-emp-5',
-    loginId: 'OITDK0220005',
-    name: 'David Kim',
-    email: 'david.kim@dayflow.internal',
-    mobile: '+91 97654 32109',
+    loginId: 'OITDIRA0220005',
+    name: 'Dinesh Rajendran',
+    email: 'dinesh.rajendran@dayflow.internal',
+    mobile: '+91 97900 11223',
     profilePicture: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=faces',
     department: 'Design',
     jobPosition: 'Principal UX Designer',
-    manager: 'Marcus Chen',
-    location: 'Bangalore Tech Hub',
+    manager: 'Senthil Murugan',
+    location: 'Madurai Digital Campus',
     company: 'Dayflow Technologies Pvt Ltd',
     dateOfJoining: '2022-10-01',
     dateOfBirth: '1993-04-20',
-    residentialAddress: '#204, Green Glen Layout, Bellandur, Bangalore 560103',
+    residentialAddress: 'Door No. 24, Meenakshi Nagar, KK Nagar, Madurai, Tamil Nadu 625020',
     nationality: 'Indian',
-    personalEmail: 'david.kim.design@gmail.com',
+    personalEmail: 'dinesh.rajendran.design@gmail.com',
     gender: 'Male',
     maritalStatus: 'Single',
-    about: 'Design systems fanatic, obsessed with typography, micro-interactions, and high-density enterprise software UX.',
-    whatILoveAboutMyJob: 'Crafting clean, peaceful software interfaces that save people hours of tedious administrative toil.',
-    interestsAndHobbies: 'Typeface design, urban sketching, mechanical keyboards, and tea ceremonies.',
+    about: 'Design systems fanatic, obsessed with typography, micro-interactions, neo-pastel design language, and high-density enterprise software UX.',
+    whatILoveAboutMyJob: 'Crafting clean, peaceful software interfaces that save thousands of hours of tedious administrative toil.',
+    interestsAndHobbies: 'Tamil typography & calligraphy, urban sketching, mechanical keyboard modding, and traditional tea ceremonies.',
     skills: [
-      { id: 'sk-14', name: 'Design Systems & Tokens', level: 'Expert' },
-      { id: 'sk-15', name: 'Figma & Interactive Prototyping', level: 'Expert' },
-      { id: 'sk-16', name: 'User Testing & Heuristic Evaluation', level: 'Advanced' },
+      { id: 'sk-14', name: 'Design Systems & Multi-Brand Tokens', level: 'Expert' },
+      { id: 'sk-15', name: 'Figma Prototyping & Motion Design', level: 'Expert' },
+      { id: 'sk-16', name: 'User Research & Heuristic Evaluation', level: 'Advanced' },
     ],
     certifications: [
       { id: 'cert-6', name: 'Nielsen Norman Group UX Master Certified', issuer: 'NN/g', issueYear: '2022' },
     ],
     documents: [
-      { id: 'doc-6', title: 'Design Employment Contract', fileName: 'David_Kim_Contract.pdf', fileSize: '1.5 MB', uploadDate: '2022-10-01', category: 'Contract' },
+      { id: 'doc-6', title: 'Design Employment Contract', fileName: 'Dinesh_Rajendran_Contract.pdf', fileSize: '1.5 MB', uploadDate: '2022-10-01', category: 'Contract' },
     ],
     bankDetails: {
       accountNumber: '33445566778899',
-      bankName: 'Kotak Mahindra Bank',
-      ifscCode: 'KKBK0000234',
-      panNumber: 'KIMDK4321R',
+      bankName: 'ICICI Bank Ltd',
+      ifscCode: 'ICIC0000234',
+      panNumber: 'KIMDR4321R',
       uanNumber: '100543210987',
       employeeCode: 'DF-DES-014',
     },
@@ -325,7 +325,7 @@ const INITIAL_EMPLOYEES = [
   },
 ];
 
-const INITIAL_LEAVES = [
+export const INITIAL_LEAVES = [
   {
     id: 'leave-1',
     employeeId: 'emp-3',
@@ -333,13 +333,13 @@ const INITIAL_LEAVES = [
     startDate: today,
     endDate: today,
     totalDays: 1,
-    remarks: 'Annual family wellness retreat and personal time off.',
-    attachmentFileName: 'travel_itinerary.pdf',
+    remarks: 'Attending annual family temple festival in Madurai.',
+    attachmentFileName: 'festival_invitation.pdf',
     status: 'Approved',
     appliedDate: '2026-08-18',
     reviewedDate: '2026-08-19',
-    reviewedBy: 'Sarah Williams (Admin)',
-    reviewRemarks: 'Approved. Enjoy your time off!',
+    reviewedBy: 'Kavitha Balasubramanian (HR)',
+    reviewRemarks: 'Approved. Have a great time with family!',
   },
   {
     id: 'leave-2',
@@ -348,8 +348,8 @@ const INITIAL_LEAVES = [
     startDate: '2026-08-28',
     endDate: '2026-08-29',
     totalDays: 2,
-    remarks: 'Scheduled minor outpatient dental surgery and recovery.',
-    attachmentFileName: 'clinic_appointment.pdf',
+    remarks: 'Scheduled outpatient dental consultation and recovery.',
+    attachmentFileName: 'dental_clinic_receipt.pdf',
     status: 'Pending',
     appliedDate: '2026-08-21',
   },
@@ -361,7 +361,7 @@ const INITIAL_LEAVES = [
     endDate: '2026-09-08',
     totalDays: 4,
     remarks: 'Attending National HR Tech Leadership Summit in Hyderabad.',
-    attachmentFileName: 'conference_pass.pdf',
+    attachmentFileName: 'conference_ticket.pdf',
     status: 'Pending',
     appliedDate: '2026-08-20',
   },
@@ -372,12 +372,12 @@ const INITIAL_LEAVES = [
     startDate: '2026-07-15',
     endDate: '2026-07-16',
     totalDays: 2,
-    remarks: 'Extended personal leave beyond allotted quota for design workshop.',
+    remarks: 'Extended personal leave for Design Typography Biennale in Kochi.',
     status: 'Approved',
     appliedDate: '2026-07-10',
     reviewedDate: '2026-07-11',
-    reviewedBy: 'Sarah Williams (Admin)',
-    reviewRemarks: 'Approved as Unpaid Leave. 2 days deducted from payable days for July.',
+    reviewedBy: 'Kavitha Balasubramanian (HR)',
+    reviewRemarks: 'Approved as Unpaid Leave. 2 days deducted from payable days for July cycle.',
   },
   {
     id: 'leave-5',
@@ -386,16 +386,16 @@ const INITIAL_LEAVES = [
     startDate: '2026-06-10',
     endDate: '2026-06-12',
     totalDays: 3,
-    remarks: 'Summer vacation trek.',
+    remarks: 'Summer vacation trip to Ooty & Coonoor hills.',
     status: 'Approved',
     appliedDate: '2026-06-01',
     reviewedDate: '2026-06-02',
-    reviewedBy: 'Sarah Williams (Admin)',
-    reviewRemarks: 'Approved.',
+    reviewedBy: 'Kavitha Balasubramanian (HR)',
+    reviewRemarks: 'Approved. Enjoy your holiday!',
   },
 ];
 
-const INITIAL_PAYROLL = [
+export const INITIAL_PAYROLL = [
   {
     id: 'pay-2026-07-emp-1',
     employeeId: 'emp-1',
@@ -448,11 +448,11 @@ const INITIAL_PAYROLL = [
   },
 ];
 
-const INITIAL_NOTIFICATIONS = [
+export const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif-1',
     title: 'New Leave Request Pending Review',
-    message: 'Alex Johnson applied for Sick Leave (28 Aug - 29 Aug, 2 days).',
+    message: 'Karthik Sundaram applied for Sick Leave (28 Aug - 29 Aug, 2 days).',
     type: 'leave',
     read: false,
     employeeId: 'emp-1',
@@ -460,7 +460,7 @@ const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif-2',
     title: 'Leave Approved',
-    message: "Marcus Chen's Paid Time Off for today has been approved by Sarah Williams.",
+    message: "Senthil Murugan's Paid Time Off for today has been approved by Kavitha Balasubramanian.",
     type: 'leave',
     read: false,
     employeeId: 'emp-3',
@@ -487,10 +487,10 @@ export async function seed() {
   const client = await pgPool.connect();
 
   try {
-    logger.info('🌱 Seeding Dayflow HRMS PostgreSQL Database...');
+    logger.info('🌱 Seeding Dayflow HRMS PostgreSQL Database with Indian Tamil records...');
     await client.query('BEGIN');
 
-    // Default password for demo users: "Dayflow@123"
+    // Default passwords for demo accounts
     const salt = await bcrypt.genSalt(12);
     const defaultPasswordHash = await bcrypt.hash('Dayflow@123', salt);
 
@@ -503,7 +503,8 @@ export async function seed() {
         ON CONFLICT ("id") DO UPDATE SET
           "email" = EXCLUDED."email",
           "loginId" = EXCLUDED."loginId",
-          "role" = EXCLUDED."role"
+          "role" = EXCLUDED."role",
+          "passwordHash" = EXCLUDED."passwordHash"
       `,
         [u.id, u.email, u.loginId, defaultPasswordHash, u.role, true]
       );
@@ -523,8 +524,17 @@ export async function seed() {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
         ON CONFLICT ("id") DO UPDATE SET
           "name" = EXCLUDED."name",
+          "email" = EXCLUDED."email",
+          "mobile" = EXCLUDED."mobile",
+          "profilePicture" = EXCLUDED."profilePicture",
           "department" = EXCLUDED."department",
           "jobPosition" = EXCLUDED."jobPosition",
+          "manager" = EXCLUDED."manager",
+          "location" = EXCLUDED."location",
+          "residentialAddress" = EXCLUDED."residentialAddress",
+          "about" = EXCLUDED."about",
+          "whatILoveAboutMyJob" = EXCLUDED."whatILoveAboutMyJob",
+          "interestsAndHobbies" = EXCLUDED."interestsAndHobbies",
           "salary" = EXCLUDED."salary",
           "skills" = EXCLUDED."skills",
           "certifications" = EXCLUDED."certifications",
@@ -563,8 +573,7 @@ export async function seed() {
       );
     }
 
-    // 3. Seed Today's & Past Attendance
-    const empIds = ['emp-1', 'emp-2', 'emp-4'];
+    // 3. Seed Today's Attendance
     const todayAtt = [
       { id: 'att-today-emp-1', employeeId: 'emp-1', date: today, checkIn: '08:55 AM', checkOut: null, workHours: 7.2, extraHours: 0, status: 'Present' },
       { id: 'att-today-emp-2', employeeId: 'emp-2', date: today, checkIn: '09:15 AM', checkOut: '06:30 PM', workHours: 9.25, extraHours: 1.25, status: 'Present' },
@@ -585,7 +594,7 @@ export async function seed() {
       );
     }
 
-    // Past 10 days
+    // Past 10 workdays
     for (let i = 1; i <= 10; i++) {
       const d = new Date();
       d.setDate(d.getDate() - i);
@@ -599,7 +608,9 @@ export async function seed() {
           `
           INSERT INTO "Attendance" ("id", "employeeId", "date", "checkInTime", "checkOutTime", "workHours", "extraHours", "status", "notes")
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-          ON CONFLICT ("employeeId", "date") DO NOTHING
+          ON CONFLICT ("employeeId", "date") DO UPDATE SET
+            "status" = EXCLUDED."status",
+            "workHours" = EXCLUDED."workHours"
         `,
           [attId, emp.id, dateStr, '09:05 AM', '06:15 PM', 8.2, 0.2, 'Present', 'Regular workday']
         );
@@ -616,7 +627,10 @@ export async function seed() {
           "appliedDate", "reviewedDate", "reviewedBy", "reviewRemarks"
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-        ON CONFLICT ("id") DO NOTHING
+        ON CONFLICT ("id") DO UPDATE SET
+          "status" = EXCLUDED."status",
+          "reviewedBy" = EXCLUDED."reviewedBy",
+          "reviewRemarks" = EXCLUDED."reviewRemarks"
       `,
         [
           l.id,
@@ -649,7 +663,9 @@ export async function seed() {
           "totalDeductions", "netPayableAmount", "status", "processedDate"
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
-        ON CONFLICT ("employeeId", "month", "year") DO NOTHING
+        ON CONFLICT ("employeeId", "month", "year") DO UPDATE SET
+          "netPayableAmount" = EXCLUDED."netPayableAmount",
+          "status" = EXCLUDED."status"
       `,
         [
           p.id,
@@ -685,14 +701,16 @@ export async function seed() {
         `
         INSERT INTO "Notification" ("id", "employeeId", "title", "message", "type", "read")
         VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT ("id") DO NOTHING
+        ON CONFLICT ("id") DO UPDATE SET
+          "title" = EXCLUDED."title",
+          "message" = EXCLUDED."message"
       `,
         [n.id, n.employeeId || null, n.title, n.message, n.type, n.read]
       );
     }
 
     await client.query('COMMIT');
-    logger.info('🎉 Database seeded successfully with 5 demo employees, attendance, leaves, payroll & notifications!');
+    logger.info('🎉 Database seeded successfully with Indian Tamil named employees, attendance, leaves, payroll & notifications!');
   } catch (err) {
     await client.query('ROLLBACK');
     logger.error({ err }, '❌ Database seeding failed');

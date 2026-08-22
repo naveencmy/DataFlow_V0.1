@@ -17,20 +17,20 @@ import attendanceRoutes from './modules/attendance/attendance.routes.js';
 import leaveRoutes from './modules/leave/leave.routes.js';
 import payrollRoutes from './modules/payroll/payroll.routes.js';
 import notificationRoutes from './modules/notification/notification.routes.js';
+import analyticsRoutes from './modules/analytics/analytics.routes.js';
 
 const app = express();
 
 // ─── Security & Core Middlewares ──────────────────────────────────────────────
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Allows Swagger UI inline assets
+    contentSecurityPolicy: false,
   })
 );
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow localhost frontend or configured frontend origin
       callback(null, true);
     },
     credentials: true,
@@ -78,6 +78,7 @@ v1Router.use('/attendance', attendanceRoutes);
 v1Router.use('/leaves', leaveRoutes);
 v1Router.use('/payroll', payrollRoutes);
 v1Router.use('/notifications', notificationRoutes);
+v1Router.use('/analytics', analyticsRoutes);
 
 app.use('/api/v1', v1Router);
 app.use('/api', v1Router); // Alias for seamless frontend compatibility

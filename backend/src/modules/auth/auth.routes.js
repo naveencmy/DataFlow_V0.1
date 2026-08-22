@@ -13,13 +13,23 @@ import {
 
 const router = Router();
 
+// Registration / Signup
 router.post('/register', validate(registerSchema), authController.register);
-router.post('/login', rateLimiter({ maxAttempts: 5, windowMs: 900000 }), validate(loginSchema), authController.login);
+router.post('/signup', validate(registerSchema), authController.register);
+
+// Login
+router.post('/login', rateLimiter({ maxAttempts: 10, windowMs: 900000 }), validate(loginSchema), authController.login);
+
+// Session & Profile
 router.post('/refresh', authController.refresh);
 router.post('/logout', authenticateJWT, authController.logout);
+router.get('/me', authenticateJWT, authController.me);
+
+// Security & Passwords
+router.put('/change-password', authenticateJWT, authController.changePassword);
+router.post('/change-password', authenticateJWT, authController.changePassword);
 router.post('/verify-email', validate(verifyEmailSchema), authController.verifyEmail);
 router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
-router.get('/me', authenticateJWT, authController.me);
 
 export default router;
