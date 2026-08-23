@@ -48,7 +48,7 @@ app.use(requestLogger);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ─── Health Check & Seed Trigger ──────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/api/v1/health', '/health'], (req, res) => {
   res.status(200).json({
     success: true,
     service: 'Dayflow HRMS REST API',
