@@ -19,10 +19,12 @@
 ---
 
 ##  Table of Contents
+- [ Desktop Application (Windows Installer)](#-desktop-application-windows-installer)
 - [ Key Capabilities & Features](#-key-capabilities--features)
 - [ System Architecture](#%EF%B8%8F-system-architecture)
 - [ Technology Stack](#%EF%B8%8F-technology-stack)
 - [ Getting Started](#-getting-started)
+  - [Desktop App (Ready to Install)](#-desktop-app-ready-to-install)
   - [Prerequisites](#prerequisites)
   - [Quickstart with Docker](#quickstart-with-docker)
   - [Manual Local Setup](#manual-local-setup)
@@ -33,6 +35,29 @@
 - [ Strategic Roadmap](#%EF%B8%8F-strategic-roadmap)
 - [ Contributing](#-contributing)
 - [License](#-license)
+
+---
+
+## 🖥️ Desktop Application (Windows Installer)
+
+DayFlow HRMS is available as a native **Windows Desktop Application** with an embedded auto-starting backend server and full offline support.
+
+| Distribution | Format | Description |
+| :--- | :--- | :--- |
+| **Windows Setup Wizard** | `.exe` (NSIS) | `DayFlow HRMS Setup 1.0.0.exe` — Full installation wizard with desktop & start menu shortcuts. |
+| **Portable Version** | `.exe` (Standalone) | `DayFlow HRMS 1.0.0.exe` — Portable standalone executable ready to run anywhere without installation. |
+
+> 💡 **Download**: Grab the latest desktop installer directly from the [GitHub Releases](../../releases) section!
+
+### Building Desktop App from Source:
+```bash
+# Build production Windows installer and portable .exe
+npm run desktop:build
+
+# Run desktop app in hot-reload development mode
+npm run desktop:dev
+```
+
 
 ---
 

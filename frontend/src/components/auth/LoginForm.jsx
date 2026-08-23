@@ -25,7 +25,10 @@ import {
   Upload,
   UserPlus,
   LogIn,
+  Server,
 } from 'lucide-react';
+import { ServerConfigModal } from '../common/ServerConfigModal.jsx';
+
 
 export const LoginForm = () => {
   const navigate = useNavigate();
@@ -37,6 +40,7 @@ export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showDemoPersonas, setShowDemoPersonas] = useState(false);
+  const [showServerModal, setShowServerModal] = useState(false);
   const [serverError, setServerError] = useState('');
   const [uploadedLogoName, setUploadedLogoName] = useState(null);
 
@@ -128,6 +132,18 @@ export const LoginForm = () => {
 
   return (
     <div className="min-h-screen aurora-login-bg flex items-center justify-center p-4 sm:p-6 lg:p-12 relative overflow-hidden font-sans select-none">
+      {/* Top Bar with Server Connection Config */}
+      <div className="absolute top-4 right-4 z-20">
+        <button
+          type="button"
+          onClick={() => setShowServerModal(true)}
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white backdrop-blur-md border border-slate-200/80 text-xs font-semibold text-slate-700 shadow-sm hover:shadow transition-all cursor-pointer"
+        >
+          <Server className="w-3.5 h-3.5 text-teal-600" />
+          <span>Server Settings</span>
+        </button>
+      </div>
+
       {/* Background Radial Glow Accents */}
       <div className="absolute top-[-10%] left-[-10%] w-[550px] h-[550px] rounded-full bg-cyan-400/30 blur-[130px] pointer-events-none animate-pulse duration-1000" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[650px] h-[650px] rounded-full bg-indigo-600/35 blur-[150px] pointer-events-none" />
@@ -501,8 +517,15 @@ export const LoginForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Server Connection Modal */}
+      <ServerConfigModal
+        isOpen={showServerModal}
+        onClose={() => setShowServerModal(false)}
+      />
     </div>
   );
 };
 
 export default LoginForm;
+

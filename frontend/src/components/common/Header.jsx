@@ -12,8 +12,11 @@ import {
   LogOut,
   ShieldCheck,
   Briefcase,
+  Server,
 } from 'lucide-react';
 import { NotificationsDrawer } from './NotificationsDrawer.jsx';
+import { ServerConfigModal } from './ServerConfigModal.jsx';
+
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -31,6 +34,7 @@ export const Header = () => {
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showServerModal, setShowServerModal] = useState(false);
   const menuRef = useRef(null);
 
   const displayName = user?.name || (isAdmin ? 'Sarah Williams' : (user?.loginId || 'Alex Johnson'));
@@ -185,6 +189,17 @@ export const Header = () => {
                   <Settings className="w-4 h-4 text-slate-400" />
                   <span>System Settings</span>
                 </button>
+
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    setShowServerModal(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-900 transition-colors cursor-pointer text-left"
+                >
+                  <Server className="w-4 h-4 text-slate-400" />
+                  <span>Server Connection</span>
+                </button>
               </div>
 
               {/* Logout Action */}
@@ -207,8 +222,15 @@ export const Header = () => {
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
       />
+
+      {/* Server Configuration Modal */}
+      <ServerConfigModal
+        isOpen={showServerModal}
+        onClose={() => setShowServerModal(false)}
+      />
     </header>
   );
 };
 
 export default Header;
+

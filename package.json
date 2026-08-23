@@ -1,0 +1,17 @@
+{
+  "name": "dayflow-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DayFlow HRMS Fullstack Workspace with Windows Desktop Application",
+  "scripts": {
+    "dev:all": "npx concurrently -n \"BACKEND,DESKTOP\" -c \"blue,green\" \"npm run backend:dev\" \"npm run desktop:dev\"",
+    "desktop:start": "powershell -Command \"Start-Process 'frontend\\release\\DayFlow HRMS 1.0.0.exe'\"",
+    "desktop:build": "npm --prefix frontend run electron:build",
+    "desktop:dev": "npm --prefix frontend run electron:dev",
+    "desktop:pack": "npm --prefix frontend run electron:pack",
+    "backend:start": "npm --prefix backend start",
+    "backend:dev": "npm --prefix backend run dev",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:build": "npm --prefix frontend run build"
+  }
+}

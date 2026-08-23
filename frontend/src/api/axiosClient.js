@@ -1,18 +1,40 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const getApiBaseUrl = () => {
+  try {
+    const customUrl = localStorage.getItem('dayflow_api_url');
+    if (customUrl) return customUrl.replace(/\/+$/, '');
+  } catch (e) {
+    // Ignore localStorage access issues
+  }
+  return (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/+$/, '');
+};
+
+export const setApiBaseUrl = (newUrl) => {
+  try {
+    if (newUrl) {
+      localStorage.setItem('dayflow_api_url', newUrl.trim().replace(/\/+$/, ''));
+    } else {
+      localStorage.removeItem('dayflow_api_url');
+    }
+    axiosClient.defaults.baseURL = getApiBaseUrl();
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+};
 
 export const axiosClient = axios.create({
-  baseURL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 10000,
 });
 
-// Attach Authorization header if JWT token exists in localStorage / authStore
+// Dynamic request interceptor ensuring active baseURL and Authorization token
 axiosClient.interceptors.request.use(
   (config) => {
+    config.baseURL = getApiBaseUrl();
     try {
       const stored = localStorage.getItem('dayflow_auth_token');
       if (stored) {
@@ -25,6 +47,7 @@ axiosClient.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
 
 // Response interceptor for error handling and session expiration
 axiosClient.interceptors.response.use(

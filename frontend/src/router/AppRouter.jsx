@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute.jsx';
 import { RoleGuard } from './RoleGuard.jsx';
 import { AppLayout } from '../components/common/AppLayout.jsx';
@@ -19,7 +19,7 @@ const SettingsPage = lazy(() => import('../pages/SettingsPage.jsx'));
 
 export const AppRouter = () => {
   return (
-    <BrowserRouter>
+    <Router>
       <ErrorBoundary>
         <Routes>
           {/* Public Login Route */}
@@ -75,7 +75,7 @@ export const AppRouter = () => {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </ErrorBoundary>
-    </BrowserRouter>
+    </Router>
   );
 };
 

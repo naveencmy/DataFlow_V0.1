@@ -1,7 +1,10 @@
 {
-  "name": "hrms",
+  "name": "dayflow-hrms-desktop",
+  "version": "1.0.0",
+  "description": "DayFlow HRMS Desktop Application",
+  "author": "Dayflow Technologies",
   "private": true,
-  "version": "0.0.0",
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +12,57 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "electron:pack": "vite build && electron-builder --dir",
+    "dist": "vite build && electron-builder"
+  },
+  "build": {
+    "appId": "com.dayflow.hrms",
+    "productName": "DayFlow HRMS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!node_modules/.cache/**/*",
+          "!tests/**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DayFlow HRMS"
+    }
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -42,11 +95,16 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "concurrently": "^9.2.4",
+    "cross-env": "^10.1.0",
+    "electron": "^41.7.1",
+    "electron-builder": "^26.15.3",
     "jsdom": "^29.1.1",
     "oxlint": "^1.75.0",
     "rollup-plugin-visualizer": "^6.0.11",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "wait-on": "^9.1.0"
   }
 }

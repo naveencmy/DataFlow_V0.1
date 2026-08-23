@@ -7,11 +7,16 @@ import { initializeSocketServer } from './sockets/socket.server.js';
 import { initializeCronJobs } from './jobs/cron.js';
 
 async function bootstrap() {
-  // 1. Initialize PostgreSQL
-  await initializeDatabase();
+  // 1. Initialize PostgreSQL (graceful fallback if database is offline)
+  try {
+    await initializeDatabase();
+  } catch (err) {
+    logger.warn({ err: err.message }, '⚠️ PostgreSQL is offline or unreachable. Backend server starting in fallback mode.');
+  }
 
   // 2. Create HTTP Server
   const server = http.createServer(app);
+
 
   // 3. Initialize Socket.io Real-Time Server
   initializeSocketServer(server);
